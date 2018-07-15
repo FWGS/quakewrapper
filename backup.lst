@@ -1,0 +1,24 @@
+//=======================================================================
+//			Copyright XashXT Group 2007 ©
+//			list with backup directories
+//=======================================================================
+
+// global stuff
+qwrap.dsw
+debug.bat
+backup.lst
+backup.bat
+release.bat
+
+cl_dll\
+common\
+dlls\
+dlls\v101qc\
+engine\
+game_shared\
+mainui\
+pm_shared\
+utils\
+utils\common\
+utils\q1mv\
+utils\q1mv\mxtk
