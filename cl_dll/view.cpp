@@ -525,11 +525,18 @@ void V_UpdatePalette (struct ref_params_s *pparams)
 		return;// no cshifts
           }
 
+	// NEHAHRA fade in
+	if( r == 0 && g == 0 && b == 0 )
+	{
+		sf.fadeFlags = FFADE_STAYOUT;
+		a = 255 - a;
+	}
+	else sf.fadeFlags = FFADE_STAYOUT|FFADE_MODULATE;
+
 	sf.fader = (int)r;
 	sf.fadeg = (int)g;
 	sf.fadeb = (int)b;
 	sf.fadealpha = (int)a;
-	sf.fadeFlags = FFADE_STAYOUT|FFADE_MODULATE;
 
 	gEngfuncs.pfnSetScreenFade( &sf );	
 	v_resetCshifts = 1;
@@ -1037,7 +1044,8 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 		if ( viewentity )
 		{
 			VectorCopy( viewentity->origin, pparams->vieworg );
-			VectorCopy( viewentity->angles, pparams->viewangles );
+// probably quake completely ignored angles from viewentity
+//			VectorCopy( viewentity->angles, pparams->viewangles );
 
 			gEngfuncs.V_CalcShake();
 			gEngfuncs.V_ApplyShake( pparams->vieworg, pparams->viewangles, 1.0 );

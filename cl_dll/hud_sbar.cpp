@@ -625,7 +625,10 @@ int CHudSBar::Draw(float fTime)
 
 	if ((gEngfuncs.GetMaxClients() == 1 ) && (gHUD.showscores || gHUD.stats[STAT_HEALTH] <= 0))
 		return 1;
-
+#if 0
+	if (gHUD.sb_lines <= 0)
+		return 1;
+#endif
 	DrawFace( fTime );
 
 	// health

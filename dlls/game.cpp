@@ -74,6 +74,28 @@ cvar_t	gl_fogred = { "gl_fogred", "0.3" };
 cvar_t	gl_fogblue = { "gl_fogblue", "0.3" };
 cvar_t	gl_foggreen = { "gl_foggreen", "0.3" };
 
+cvar_t	nehx00 = {"nehx00", "0"};
+cvar_t	nehx01 = {"nehx01", "0"};
+cvar_t	nehx02 = {"nehx02", "0"};
+cvar_t	nehx03 = {"nehx03", "0"};
+cvar_t	nehx04 = {"nehx04", "0"};
+cvar_t	nehx05 = {"nehx05", "0"};
+cvar_t	nehx06 = {"nehx06", "0"};
+cvar_t	nehx07 = {"nehx07", "0"};
+cvar_t	nehx08 = {"nehx08", "0"};
+cvar_t	nehx09 = {"nehx09", "0"};
+cvar_t	nehx10 = {"nehx10", "0"};
+cvar_t	nehx11 = {"nehx11", "0"};
+cvar_t	nehx12 = {"nehx12", "0"};
+cvar_t	nehx13 = {"nehx13", "0"};
+cvar_t	nehx14 = {"nehx14", "0"};
+cvar_t	nehx15 = {"nehx15", "0"};
+cvar_t	nehx16 = {"nehx16", "0"};
+cvar_t	nehx17 = {"nehx17", "0"};
+cvar_t	nehx18 = {"nehx18", "0"};
+cvar_t	nehx19 = {"nehx19", "0"};
+cvar_t	cutscene = {"cutscene", "1"};
+
 // Engine Cvars
 cvar_t 	*g_psv_gravity = NULL;
 cvar_t	*g_psv_aim = NULL;
@@ -226,7 +248,29 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&gl_fogred);
 	CVAR_REGISTER (&gl_foggreen); 
 	CVAR_REGISTER (&gl_fogblue);
- 
+
+	// NEHAHRA variables
+	CVAR_REGISTER (&nehx00);
+	CVAR_REGISTER (&nehx01);
+	CVAR_REGISTER (&nehx02);
+	CVAR_REGISTER (&nehx03);
+	CVAR_REGISTER (&nehx04);
+	CVAR_REGISTER (&nehx05);
+	CVAR_REGISTER (&nehx06);
+	CVAR_REGISTER (&nehx07);
+	CVAR_REGISTER (&nehx08);
+	CVAR_REGISTER (&nehx09);
+	CVAR_REGISTER (&nehx10);
+	CVAR_REGISTER (&nehx11);
+	CVAR_REGISTER (&nehx12);
+	CVAR_REGISTER (&nehx13);
+	CVAR_REGISTER (&nehx14);
+	CVAR_REGISTER (&nehx15);
+	CVAR_REGISTER (&nehx16);
+	CVAR_REGISTER (&nehx17);
+	CVAR_REGISTER (&nehx18);
+	CVAR_REGISTER (&nehx19);
+	CVAR_REGISTER (&cutscene);
 	LinkUserMessages ();
 
 	// ripped out from quake
