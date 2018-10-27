@@ -164,6 +164,9 @@ void HUD_ParseBeam( const char *modelname )
 	int	ent;
 	Vector	start, end;
 
+	if( modelname == NULL )
+		modelname = READ_STRING();
+
 	ent = READ_SHORT ();
 	
 	start.x = READ_COORD ();
@@ -174,9 +177,7 @@ void HUD_ParseBeam( const char *modelname )
 	end.y = READ_COORD ();
 	end.z = READ_COORD ();
 
-	if( modelname != NULL )
-		CL_AllocBeam( modelname, ent, start, end );
-	else CL_AllocBeam( READ_STRING(), ent, start, end );
+	CL_AllocBeam( modelname, ent, start, end );
 }
 
 int CHud :: MsgFunc_TempEntity( const char *pszName, int iSize, void *pbuf )
@@ -188,7 +189,7 @@ int CHud :: MsgFunc_TempEntity( const char *pszName, int iSize, void *pbuf )
 	dlight_t *dl;
 	int colorStart, colorLength;
 
-	if (type != TE_LIGHTNING1 && type != TE_LIGHTNING2 && type != TE_LIGHTNING3)
+	if (type != TE_LIGHTNING1 && type != TE_LIGHTNING2 && type != TE_LIGHTNING3 && type != TE_LIGHTNING4 && type != TE_BEAM)
 	{
 		// all quake temp ents begin from pos
 		pos.x = READ_COORD ();

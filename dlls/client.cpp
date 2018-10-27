@@ -828,7 +828,7 @@ Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 */
 const char *GetGameDescription()
 {
-	return "Quake Wrapper v0.56 beta";
+	return "Quake Wrapper v0.6";
 }
 
 /*

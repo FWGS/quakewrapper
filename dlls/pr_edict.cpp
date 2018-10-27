@@ -907,6 +907,9 @@ int ED_LoadFromFile( const char *mapname, char *entities )
 
 	pr.global_struct->time = gpGlobals->time;
 	pr.global_struct->mapname = gpGlobals->mapname;
+	pr.global_struct->deathmatch = gpGlobals->deathmatch;
+	pr.global_struct->coop = gpGlobals->coop;
+	pr.global_struct->teamplay = gpGlobals->teamplay;
 	pr.global_struct->total_secrets = 0;
 	pr.global_struct->found_secrets = 0;
 	pr.global_struct->total_monsters = 0;
