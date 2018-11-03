@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "Menu.h"
+#include "menu.h"
 
 enum m_state_e 
 {
@@ -136,15 +136,15 @@ void COM_FileBase ( const char *in, char *out )
 	int len, start, end;
 
 	len = strlen( in );
-	
+
 	// scan backward for '.'
 	end = len - 1;
 	while ( end && in[end] != '.' && in[end] != '/' && in[end] != '\\' )
 		end--;
-	
+
 	if ( in[end] != '.' )		// no '.', copy to end
 		end = len-1;
-	else 
+	else
 		end--;			// Found ',', copy to left of '.'
 
 
@@ -155,7 +155,7 @@ void COM_FileBase ( const char *in, char *out )
 
 	if ( in[start] != '/' && in[start] != '\\' )
 		start = 0;
-	else 
+	else
 		start++;
 
 	// Length of new sting
@@ -1996,7 +1996,8 @@ void M_Quit_Draw (void)
 	
 	for( int i = 0; i < 4; i++ )
 	{
-		M_PrintWhite( 16, 68 + i*8, quitMessage[msgNumber*4 + i] );
+		// center message
+		M_PrintWhite( 16 + 8 * 5, 68 + i*8, quitMessage[msgNumber*4 + i] );
 	}
 	/*M_Print (16, 52,  " \n");
 	M_Print (16, 60,  " \n");

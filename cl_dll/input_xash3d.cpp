@@ -157,12 +157,12 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 	}
 	//if(ac_forwardmove || ac_sidemove)
 	//gEngfuncs.Con_Printf("Move: %f %f %f %f\n", ac_forwardmove, ac_sidemove, rel_pitch, rel_yaw);
-#if 0
 	if( in_mlook.state & 1 )
 	{
+		void V_StopPitchDrift( void );
 		V_StopPitchDrift();
 	}
-#endif
+
 	if( CL_IsDead() )
 	{
 		viewangles = dead_viewangles; // HACKHACK: see below
