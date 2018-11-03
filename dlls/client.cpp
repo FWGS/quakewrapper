@@ -536,7 +536,7 @@ void UpdateClientData( edict_t *pEntity )
 
 	if (pev->health != pcache->health)
 	{
-		int iHealth = max( pev->health, 0 );  // make sure that no negative health values are sent
+		int iHealth = Q_max( pev->health, 0 );  // make sure that no negative health values are sent
 
 		MESSAGE_BEGIN( MSG_ONE, gmsgStats, pEntity );
 			WRITE_BYTE( STAT_HEALTH );

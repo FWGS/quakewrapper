@@ -54,7 +54,9 @@ typedef int BOOL;
 #endif
 #ifndef max
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
+#ifndef _vsnprintf
 #define _vsnprintf(a,b,c,d) vsnprintf(a,b,c,d)
+#endif
 #endif
 #endif //_WIN32
 

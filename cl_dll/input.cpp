@@ -29,6 +29,7 @@ extern "C"
 #include "r_studioint.h"
 #include "com_model.h"
 #include "cl_entity.h"
+#include "exportdef.h"
 
 extern "C" 
 {

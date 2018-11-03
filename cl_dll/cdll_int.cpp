@@ -29,16 +29,14 @@ extern "C"
 }
 
 #include <string.h>
-#include <windows.h>
-
-#define DLLEXPORT __declspec( dllexport )
-
+// #include <windows.h>
+#include "exportdef.h"
 
 cl_enginefunc_t gEngfuncs;
 render_api_t gRenderfuncs;
 CHud gHUD;
 int g_iXashEngine = FALSE;
-BOOL g_fRenderInitialized = FALSE;
+qboolean g_fRenderInitialized = FALSE;
 void InitInput (void);
 void EV_HookEvents( void );
 void IN_Commands( void );
@@ -80,7 +78,8 @@ HUD_GetRect
 Vgui stub
 ================================
 */
-int *HUD_GetRect( void )
+// a1ba: not supposed to run under GoldSrc, so why we should care about VGui_ViewportPaintBackground?
+/*int *HUD_GetRect( void )
 {
 	RECT wrect;
 	static int extent[4];
@@ -103,7 +102,7 @@ int *HUD_GetRect( void )
 		}
 	}
 	return extent;	
-}
+}*/
 
 /*
 ================================
@@ -296,7 +295,8 @@ Called by engine every frame that client .dll is loaded
 
 void DLLEXPORT HUD_Frame( double time )
 {
-	gEngfuncs.VGui_ViewportPaintBackground( HUD_GetRect( ));
+	// a1ba: not supposed to run under GoldSrc, so why we should care about VGui_ViewportPaintBackground?
+	// gEngfuncs.VGui_ViewportPaintBackground( HUD_GetRect( ));
 }
 
 /*

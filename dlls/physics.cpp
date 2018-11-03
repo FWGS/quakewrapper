@@ -25,9 +25,8 @@
 #include "client.h"
 #include "physcallback.h"
 #include "com_model.h"
-#include "features.h"
+#include "enginefeatures.h"
 #include  "pm_defs.h"
-#include "features.h"
 
 extern DLL_GLOBAL BOOL		g_fXashEngine;
 

@@ -18,7 +18,7 @@ GNU General Public License for more details.
 #include "client.h"
 #include "physcallback.h"
 #include "com_model.h"
-#include "features.h"
+#include "enginefeatures.h"
 
 /*
 ==================

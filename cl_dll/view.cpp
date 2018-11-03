@@ -7,12 +7,12 @@
 
 // view/refresh setup functions
 
+#include <string.h>
 #include "hud.h"
 #include "cl_util.h"
 #include "cvardef.h"
 #include "usercmd.h"
 #include "const.h"
-#include <windows.h>
 #include "entity_state.h"
 #include "cl_entity.h"
 #include "ref_params.h"

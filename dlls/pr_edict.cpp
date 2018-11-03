@@ -521,7 +521,8 @@ void ED_Print( edict_t *ed )
 		// if the value is still all 0, skip the field
 		int type = d->type & ~DEF_SAVEGLOBAL;
 		
-		for( int j = 0; j < gProgSizes[type]; j++ )
+		int j;
+		for( j = 0; j < gProgSizes[type]; j++ )
 			if( v[j] ) break;
 
 		if( j == gProgSizes[type] )

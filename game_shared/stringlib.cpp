@@ -4,9 +4,13 @@
 //=======================================================================
 
 #define NOMINMAX
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include <stdio.h>
 #include <math.h>
+#include <ctype.h>
+#include <stdarg.h>
 #include <stringlib.h>
 
 #pragma warning(disable : 4244)	// MIPS

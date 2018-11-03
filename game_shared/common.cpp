@@ -14,7 +14,9 @@ GNU General Public License for more details.
 */
 
 #define NOMINMAX
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include <stdio.h>
 #include <stringlib.h>
 
@@ -164,7 +166,7 @@ char *COM_ParseFileExt( char *data, char *token, long token_size, bool allowNewL
 		
 // skip whitespace
 skipwhite:
-	while(( c = ((byte)*data)) <= ' ' )
+	while(( c = ((unsigned char)*data)) <= ' ' )
 	{
 		if( c == 0 )
 			return NULL;	// end of file;
@@ -192,7 +194,7 @@ skipwhite:
 		data++;
 		while( 1 )
 		{
-			c = (byte)*data++;
+			c = (unsigned char)*data++;
 			if( c == '\"' || !c )
 			{
 				if( len < token_size )
@@ -227,7 +229,7 @@ skipwhite:
 			token[len] = c;
 		data++;
 		len++;
-		c = ((byte)*data);
+		c = ((unsigned char)*data);
 
 		if( c == '{' || c == '}' || c == ')' || c == '(' || c == '\'' || c == ',' || c == '|' )
 			break;

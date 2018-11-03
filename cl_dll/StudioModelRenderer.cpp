@@ -28,6 +28,7 @@
 #include "r_studioint.h"
 
 #include "StudioModelRenderer.h"
+#include "exportdef.h"
 
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
@@ -1872,7 +1873,6 @@ HUD_GetStudioModelInterface
 Export this function for the engine to use the studio renderer class to render objects.
 ====================
 */
-#define DLLEXPORT __declspec( dllexport )
 extern "C" int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio )
 {
 	if ( version != STUDIO_INTERFACE_VERSION )

@@ -15,7 +15,13 @@
 #include "camera.h"
 #include "in_defs.h"
 #include "cl_entity.h"
+#ifdef _WIN32
 #include "windows.h"
+#else // _WIN32
+// unused functionality, so it's safe to just throw it out here
+#define GetCursorPos( ppt )
+#define SetCursorPos( x, y )
+#endif // _WIN32
 
 float CL_KeyState (kbutton_t *key);
 
@@ -75,6 +81,12 @@ int iMouseInUse=0;
 int cam_distancemove;
 extern int mouse_x, mouse_y;  //used to determine what the current x and y values are
 int cam_old_mouse_x, cam_old_mouse_y; //holds the last ticks mouse movement
+#ifndef _WIN32
+struct POINT
+{
+	int x, y;
+};
+#endif
 POINT		cam_mouse;
 //-------------------------------------------------- Local Variables
 
