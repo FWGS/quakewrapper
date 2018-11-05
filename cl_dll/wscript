@@ -1,0 +1,52 @@
+#! /usr/bin/env python
+# encoding: utf-8
+# mittorn, 2018
+
+from waflib import Logs
+import os
+
+top = '.'
+
+def options(opt):
+	# stub
+	return
+
+def configure(conf):
+	# stub
+	conf.env.append_unique('DEFINES', 'stricmp=strcasecmp')
+	conf.env.append_unique('DEFINES', 'stristr=strcasestr')
+	conf.env.append_unique('DEFINES', '_vsnprintf=vsnprintf')
+
+	# most compilers support -Wno
+	if(conf.env.COMPILER_CC != 'msvc'):
+		conf.env.append_unique('CFLAGS', '-Wno-write-strings')
+		conf.env.append_unique('CXXFLAGS', '-Wno-write-strings')
+	return
+
+def get_subproject_name(ctx):
+	return os.path.basename(os.path.realpath(str(ctx.path)))
+
+def build(bld):
+	bld.load_envs()
+	bld.env = bld.all_envs[get_subproject_name(bld)]
+
+	if bld.env.DEDICATED or bld.env.NO_VGUI:
+		return
+
+	libs = []
+
+	if bld.env.DEST_OS != 'win32':
+		libs = ['M']
+
+	source = bld.path.ant_glob(['*.cpp'])
+	source += bld.path.parent.ant_glob(['pm_shared/*.c', 'game_shared/*.cpp'])
+
+	includes = [ '.', '../common', '../engine', '../dlls', '../pm_shared/', '../game_shared' ]
+
+	bld.shlib(
+		source   = source,
+		target   = 'client',
+		features = 'cxx',
+		includes = includes,
+		use      = libs,
+		install_path = bld.env.LIBDIR)
