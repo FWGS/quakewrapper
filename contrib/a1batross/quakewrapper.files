@@ -32,6 +32,7 @@ cl_dll/view.cpp
 cl_dll/view.h
 cl_dll/wrect.h
 cl_dll/wscript
+cl_dll/render/r_main.cpp
 common/beamdef.h
 common/bspfile.h
 common/cl_entity.h

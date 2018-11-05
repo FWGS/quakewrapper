@@ -36,7 +36,6 @@ cl_enginefunc_t gEngfuncs;
 render_api_t gRenderfuncs;
 CHud gHUD;
 int g_iXashEngine = FALSE;
-qboolean g_fRenderInitialized = FALSE;
 void InitInput (void);
 void EV_HookEvents( void );
 void IN_Commands( void );
@@ -68,7 +67,6 @@ void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
 void	DLLEXPORT Demo_ReadBuffer( int size, unsigned char *buffer );
 void	DLLEXPORT HUD_DrawNormalTriangles( void );
 void	DLLEXPORT HUD_DrawTransparentTriangles( void );
-int	DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
 }
 
 /*
@@ -354,33 +352,4 @@ Render any triangles with transparent rendermode needs here
 */
 void DLLEXPORT HUD_DrawTransparentTriangles( void )
 {
-}
-
-//
-// Xash3D render interface
-//
-static render_interface_t gRenderInterface = 
-{
-	CL_RENDER_INTERFACE_VERSION,
-};
-
-int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback )
-{
-	if ( !callback || !renderfuncs || version != CL_RENDER_INTERFACE_VERSION )
-	{
-		return FALSE;
-	}
-
-	size_t iImportSize = sizeof( render_interface_t );
-	size_t iExportSize = sizeof( render_api_t );
-
-	// copy new physics interface
-	memcpy( &gRenderfuncs, renderfuncs, iExportSize );
-
-	// fill engine callbacks
-	memcpy( callback, &gRenderInterface, iImportSize );
-
-	g_fRenderInitialized = TRUE;
-
-	return TRUE;
 }
