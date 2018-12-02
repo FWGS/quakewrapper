@@ -17,6 +17,7 @@
 //
 
 #include "cvardef.h"
+#include <windows.h>
 
 #ifndef TRUE
 #define TRUE 1
@@ -45,6 +46,7 @@
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
 inline char* CVAR_GET_STRING( const char *x ) {	return gEngfuncs.pfnGetCvarString( (char*)x ); }
 inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int flags ) {	return gEngfuncs.pfnRegisterVariable( (char*)cv, (char*)val, flags ); }
+#define CVAR_TO_BOOL( x )		((x) && ((x)->value != 0.0f) ? true : false )
 
 #define SPR_Load (*gEngfuncs.pfnSPR_Load)
 #define SPR_Set (*gEngfuncs.pfnSPR_Set)
@@ -181,3 +183,16 @@ void	QuaternionSlerp( vec4_t p, vec4_t q, float t, vec4_t qt );
 void	AngleQuaternion( float *angles, vec4_t quaternion );
 
 struct mleaf_s *Mod_PointInLeaf( Vector p, struct mnode_s *node );
+
+typedef HMODULE dllhandle_t;
+
+typedef struct dllfunc_s
+{
+	const char *name;
+	void	**func;
+} dllfunc_t;
+
+// dll managment
+bool Sys_LoadLibrary( const char *dllname, dllhandle_t *handle, const dllfunc_t *fcts = NULL );
+void *Sys_GetProcAddress( dllhandle_t handle, const char *name );
+void Sys_FreeLibrary( dllhandle_t *handle );

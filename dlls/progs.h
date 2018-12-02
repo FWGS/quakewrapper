@@ -130,7 +130,6 @@ typedef struct
 	bool		trace;
 	bool		precache;
 	bool		loadgame;
-	int		cached_fog;
 
 	float		spawn_parms[MAX_CLIENTS][NUM_SPAWN_PARMS];
 	pr_client_cache_t	client_cache[MAX_CLIENTS];

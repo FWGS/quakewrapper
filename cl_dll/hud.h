@@ -329,7 +329,19 @@ private:
 //-----------------------------------------------------
 //
 
-
+class CHudSound: public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int PlayTracker( const char* name );
+	int Draw( float flTime );
+	int Close( void );
+	void UserCmd_PlayMod( void );
+	void UserCmd_StopMod( void );
+private:
+	float m_flVolume;
+};
 
 class CHud
 {
@@ -373,6 +385,7 @@ public:
 	CHudScoreboard	m_Scoreboard;
 	CHudSayText	m_SayText;
 	CHudTextMessage	m_TextMessage;
+          CHudSound		m_Sound;
 
 	void Init( void );
 	void VidInit( void );

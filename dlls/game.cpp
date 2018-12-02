@@ -68,12 +68,6 @@ cvar_t	allowmonsters={"mp_allowmonsters","0", FCVAR_SERVER };
 cvar_t  mp_chattime = {"mp_chattime","10", FCVAR_SERVER };
 
 // NEHAHRA stuff
-cvar_t	gl_fogenable = { "gl_fogenable", "0" };
-cvar_t	gl_fogdensity = { "gl_fogdensity", "0.8" };
-cvar_t	gl_fogred = { "gl_fogred", "0.3" };
-cvar_t	gl_fogblue = { "gl_fogblue", "0.3" };
-cvar_t	gl_foggreen = { "gl_foggreen", "0.3" };
-
 cvar_t	nehx00 = {"nehx00", "0"};
 cvar_t	nehx01 = {"nehx01", "0"};
 cvar_t	nehx02 = {"nehx02", "0"};
@@ -243,12 +237,6 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER (&pr_checkextension);
 
-	CVAR_REGISTER (&gl_fogenable);
-	CVAR_REGISTER (&gl_fogdensity);
-	CVAR_REGISTER (&gl_fogred);
-	CVAR_REGISTER (&gl_foggreen); 
-	CVAR_REGISTER (&gl_fogblue);
-
 	// NEHAHRA variables
 	CVAR_REGISTER (&nehx00);
 	CVAR_REGISTER (&nehx01);
@@ -282,10 +270,10 @@ void GameDLLInit( void )
 void GameResetFog( void )
 {
 	CVAR_SET_FLOAT( "gl_fogenable", 0.0f );
-	CVAR_SET_FLOAT( "gl_fogdensity", 0.0f );
-	CVAR_SET_FLOAT( "gl_fogred", 0.0f );
-	CVAR_SET_FLOAT( "gl_foggreen", 0.0f );
-	CVAR_SET_FLOAT( "gl_fogblue", 0.0f );
+	CVAR_SET_FLOAT( "gl_fogdensity", 0.8f );
+	CVAR_SET_FLOAT( "gl_fogred", 0.3f );
+	CVAR_SET_FLOAT( "gl_foggreen", 0.3f );
+	CVAR_SET_FLOAT( "gl_fogblue", 0.3f );
 }
 
 void GameDLLShutdown( void )

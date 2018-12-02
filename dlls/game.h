@@ -33,12 +33,6 @@ extern cvar_t	teamoverride;
 extern cvar_t	defaultteam;
 extern cvar_t	allowmonsters;
 
-extern cvar_t	gl_fogenable;
-extern cvar_t	gl_fogdensity;
-extern cvar_t	gl_fogred;
-extern cvar_t	gl_fogblue;
-extern cvar_t	gl_foggreen;
-
 // Engine Cvars
 extern cvar_t	*g_psv_gravity;
 extern cvar_t	*g_psv_aim;

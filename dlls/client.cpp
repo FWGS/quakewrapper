@@ -792,31 +792,6 @@ void EndFrame( void )
 
 		ED_UpdateEdictFields( pPlayer );	
 	}
-
-	// check fog changes
-	if( gl_fogenable.value )
-	{
-		int	packed_fog[4], impulse;
-
-		packed_fog[0] = ((gl_fogdensity.value / 100.0f) * 64.0f) * 255;
-		packed_fog[1] = (gl_fogred.value) * 255;
-		packed_fog[2] = (gl_foggreen.value) * 255;
-		packed_fog[3] = (gl_fogblue.value) * 255;
-
-		// temporare place for store fog settings
-		impulse = (packed_fog[1]<<24)|(packed_fog[2]<<16)|(packed_fog[3]<<8)|packed_fog[0];
-
-		if( pr.cached_fog != impulse )
-		{
-			UPDATE_PACKED_FOG( impulse );
-			pr.cached_fog = impulse;
-		}
-	}
-	else if( pr.cached_fog != 0 )
-	{
-		UPDATE_PACKED_FOG( 0 );
-		pr.cached_fog = 0;
-	}
 }
 
 /*

@@ -191,6 +191,10 @@ SOURCE=.\scoreboard.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\sound.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\game_shared\stringlib.cpp
 # End Source File
 # Begin Source File

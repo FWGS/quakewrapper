@@ -762,6 +762,11 @@ typedef struct
 #pragma pack( pop )
 #endif
 
+// Keeps clutter down a bit, when using a float as a bit-vector
+#define SetBits(flBitVector, bits)		((flBitVector) = (int)(flBitVector) | (bits))
+#define ClearBits(flBitVector, bits)	((flBitVector) = (int)(flBitVector) & ~(bits))
+#define FBitSet(flBitVector, bit)		((int)(flBitVector) & (bit))
+
 typedef struct link_s
 {
 	struct link_s	*prev, *next;

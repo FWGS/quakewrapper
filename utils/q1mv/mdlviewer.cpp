@@ -29,7 +29,7 @@
 #include "AliasModel.h"
 
 MDLViewer *g_MDLViewer = 0;
-char g_appTitle[] = "Quake 1 Model Viewer v0.50 alpha";
+char g_appTitle[] = "Quake 1 Model Viewer v0.60 stable";
 static char recentFiles[8][256] = { "", "", "", "", "", "", "", "" };
 extern bool bUseWeaponOrigin;
 extern bool bUseWeaponLeftHand;
@@ -389,12 +389,12 @@ MDLViewer::handleEvent (mxEvent *event)
 			break;
 		}
 		case 'v':
-		case 'Ã¬':
+		case 'ì':
 			bUseWeaponOrigin = !mb->isChecked( IDC_OPTIONS_WEAPONORIGIN );
 			mb->setChecked( IDC_OPTIONS_WEAPONORIGIN, bUseWeaponOrigin );
 			break;
 		case 'l':
-		case 'Ã¤':
+		case 'ä':
 			bUseWeaponLeftHand = !mb->isChecked( IDC_OPTIONS_LEFTHAND );
 			mb->setChecked( IDC_OPTIONS_LEFTHAND, bUseWeaponLeftHand );
 			break;
@@ -697,7 +697,7 @@ MDLViewer::handleEvent (mxEvent *event)
 
 		case IDC_HELP_ABOUT:
 			mxMessageBox (this,
-				"Quake 1 Model Viewer v0.40 (c) 2018 by Unkle Mike\n"
+				"Quake 1 Model Viewer v0.60 (c) 2018 by Unkle Mike\n"
 				"Based on original MD2V code by Mete Ciragan\n\n"
 				"Left-drag to rotate.\n"
 				"Right-drag to zoom.\n"

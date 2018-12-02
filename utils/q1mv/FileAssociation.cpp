@@ -138,7 +138,7 @@ FileAssociation::initAssociations ()
 	for (i = 0; i < 16; i++)
 		d_associations[i].association = -1;
 
-	FILE *file = fopen ("md2.fa", "rt");
+	FILE *file = fopen ("hlmv.fa", "rt");
 	if (!file)
 		return;
 
@@ -228,7 +228,7 @@ FileAssociation::saveAssociations ()
 	char path[256];
 
 	strcpy (path, mx::getApplicationPath ());
-	strcat (path, "/md2.fa");
+	strcat (path, "/hlmv.fa");
 
 	FILE *file = fopen (path, "wt");
 	if (!file)

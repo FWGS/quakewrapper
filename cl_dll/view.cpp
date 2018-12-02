@@ -112,6 +112,19 @@ cvar_t	*cl_bobup;
 cvar_t	*cl_waterdist;
 cvar_t	*cl_chasedist;
 
+cvar_t	*gl_fogenable;
+cvar_t	*gl_fogdensity;
+cvar_t	*gl_fogred;
+cvar_t	*gl_fogblue;
+cvar_t	*gl_foggreen;
+cvar_t	*gl_polyblend;
+cvar_t	*gl_flashblend;
+cvar_t	*r_wateralpha;
+cvar_t	*r_waterripple;
+cvar_t	*r_oldsky;
+
+cvar_t	*v_idlescale;
+
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
 cvar_t	v_iyaw_cycle		= {"v_iyaw_cycle", "2", 0, 2};
@@ -124,8 +137,6 @@ cvar_t	gl_cshiftpercent		= {"gl_cshiftpercent", "100", 0, 100};
 cvar_t	v_kicktime		= {"v_kicktime", "0.5", 0, 0.5};
 cvar_t	v_kickroll		= {"v_kickroll", "0.6", 0, 0.6};
 cvar_t	v_kickpitch		= {"v_kickpitch", "0.6", 0, 0.6};
-
-float	v_idlescale;  // used by TFC for concussion grenade effect
 
 float	v_dmg_time, v_dmg_roll, v_dmg_pitch;
 float	v_blend[4];   // rgba 0.0 - 1.0
@@ -464,6 +475,9 @@ void V_UpdatePalette (struct ref_params_s *pparams)
 	int	i, j;
 	float	r,g,b,a;
 
+	if( !CVAR_TO_BOOL( gl_polyblend ))
+		return;
+
 	cl_entity_t *world = gEngfuncs.GetEntityByIndex(0);
 
 	// set contents color
@@ -563,11 +577,11 @@ void V_CalcGunAngle ( struct ref_params_s *pparams )
 
 	viewent->angles[YAW]   =  pparams->viewangles[YAW]   + pparams->crosshairangle[YAW];
 	viewent->angles[PITCH] = -pparams->viewangles[PITCH] + pparams->crosshairangle[PITCH] * 0.25;
-	viewent->angles[ROLL]  -= v_idlescale * sin(pparams->time*v_iroll_cycle.value) * v_iroll_level.value;
+	viewent->angles[ROLL]  -= v_idlescale->value * sin(pparams->time*v_iroll_cycle.value) * v_iroll_level.value;
 	
 	// don't apply all of the v_ipitch to prevent normally unseen parts of viewmodel from coming into view.
-	viewent->angles[PITCH] -= v_idlescale * sin(pparams->time*v_ipitch_cycle.value) * (v_ipitch_level.value * 0.5);
-	viewent->angles[YAW]   -= v_idlescale * sin(pparams->time*v_iyaw_cycle.value) * v_iyaw_level.value;
+	viewent->angles[PITCH] -= v_idlescale->value * sin(pparams->time*v_ipitch_cycle.value) * (v_ipitch_level.value * 0.5);
+	viewent->angles[YAW]   -= v_idlescale->value * sin(pparams->time*v_iyaw_cycle.value) * v_iyaw_level.value;
 
 	VectorCopy( viewent->angles, viewent->curstate.angles );
 	VectorCopy( viewent->angles, viewent->latched.prevangles );
@@ -582,9 +596,9 @@ Idle swaying
 */
 void V_AddIdle ( struct ref_params_s *pparams )
 {
-	pparams->viewangles[ROLL] += v_idlescale * sin(pparams->time*v_iroll_cycle.value) * v_iroll_level.value;
-	pparams->viewangles[PITCH] += v_idlescale * sin(pparams->time*v_ipitch_cycle.value) * v_ipitch_level.value;
-	pparams->viewangles[YAW] += v_idlescale * sin(pparams->time*v_iyaw_cycle.value) * v_iyaw_level.value;
+	pparams->viewangles[ROLL] += v_idlescale->value * sin(pparams->time*v_iroll_cycle.value) * v_iroll_level.value;
+	pparams->viewangles[PITCH] += v_idlescale->value * sin(pparams->time*v_ipitch_cycle.value) * v_ipitch_level.value;
+	pparams->viewangles[YAW] += v_idlescale->value * sin(pparams->time*v_iyaw_cycle.value) * v_iyaw_level.value;
 }
 
 
@@ -668,12 +682,12 @@ void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 	view->model = NULL;
 
 	// allways idle in intermission
-	old = v_idlescale;
-	v_idlescale = 1;
+	old = v_idlescale->value;
+	v_idlescale->value = 1.0f;
 
 	V_AddIdle ( pparams );
 
-	v_idlescale = old;
+	v_idlescale->value = old;
 
 	v_cl_angles = pparams->cl_viewangles;
 	v_origin = pparams->vieworg;
@@ -1060,6 +1074,65 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	v_origin = pparams->vieworg;
 }
 
+void V_UpdateFog( struct ref_params_s *pparams )
+{
+	if( FBitSet( gl_fogenable->flags|gl_fogdensity->flags|gl_fogred->flags|gl_foggreen->flags|gl_fogblue->flags, FCVAR_CHANGED ))
+	{
+		if( CVAR_TO_BOOL( gl_fogenable ))
+		{
+			int	packed_fog[4];
+
+			packed_fog[0] = (gl_fogdensity->value * gl_fogdensity->value * 32.0f) * 255;	// FIXME: tune multiplier
+			packed_fog[1] = (gl_fogred->value) * 255;
+			packed_fog[2] = (gl_foggreen->value) * 255;
+			packed_fog[3] = (gl_fogblue->value) * 255;
+
+			// pack setttings into single variable
+			pparams->movevars->fog_settings = (packed_fog[1]<<24)|(packed_fog[2]<<16)|(packed_fog[3]<<8)|packed_fog[0];
+			gEngfuncs.Con_Printf( "fog changed to: %g %g %g : %g\n", gl_fogred->value, gl_foggreen->value, gl_fogblue->value, gl_fogdensity->value );
+		}
+		else
+		{
+			gEngfuncs.Con_Printf( "fog disabled\n" );
+			pparams->movevars->fog_settings = 0;
+		}
+
+		ClearBits( gl_fogenable->flags, FCVAR_CHANGED );
+		ClearBits( gl_fogdensity->flags, FCVAR_CHANGED );
+		ClearBits( gl_fogred->flags, FCVAR_CHANGED );
+		ClearBits( gl_foggreen->flags, FCVAR_CHANGED );
+		ClearBits( gl_fogblue->flags, FCVAR_CHANGED );
+	}
+
+	if( FBitSet( r_wateralpha->flags, FCVAR_CHANGED ))
+	{
+		pparams->movevars->wateralpha = r_wateralpha->value;
+		ClearBits( r_wateralpha->flags, FCVAR_CHANGED );
+		gEngfuncs.Con_Printf( "water alpha set to %g\n", pparams->movevars->wateralpha );
+	}
+
+	if( FBitSet( r_waterripple->flags, FCVAR_CHANGED ))
+	{
+		gEngfuncs.GetEntityByIndex( 0 )->curstate.scale = r_waterripple->value * (1.0f/8.0f);	// FIXME: tune multiplier
+		gEngfuncs.Con_Printf( "water waveheight set to %g\n", gEngfuncs.GetEntityByIndex( 0 )->curstate.scale );
+		ClearBits( r_waterripple->flags, FCVAR_CHANGED );
+	}
+
+	if( FBitSet( r_oldsky->flags, FCVAR_CHANGED ))
+	{
+		if( CVAR_TO_BOOL( r_oldsky ))
+		{
+			gEngfuncs.Con_Printf( "sky reset to Quake\n" );
+			gEngfuncs.pfnClientCmd( "loadsky \"\"" );
+		}
+		else
+		{
+			gEngfuncs.pfnClientCmd( UTIL_VarArgs( "loadsky %s", pparams->movevars->skyName ));
+		}
+		ClearBits( r_oldsky->flags, FCVAR_CHANGED );
+	}
+}
+
 void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 {
 	gpViewParams = pparams;
@@ -1075,6 +1148,7 @@ void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	}
 
 	V_UpdatePalette (pparams);
+	V_UpdateFog (pparams);
 }
 
 /*
@@ -1128,4 +1202,17 @@ void V_Init (void)
 	cl_bobup		= gEngfuncs.pfnRegisterVariable( "cl_bobup","0.5", 0 );
 	cl_waterdist	= gEngfuncs.pfnRegisterVariable( "cl_waterdist","4", 0 );
 	cl_chasedist	= gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
+
+	gl_fogenable	= gEngfuncs.pfnRegisterVariable( "gl_fogenable","0", 0 );
+	gl_fogdensity	= gEngfuncs.pfnRegisterVariable( "gl_fogdensity","0.8", 0 );
+	gl_fogred		= gEngfuncs.pfnRegisterVariable( "gl_fogred","0.3", 0 );
+	gl_fogblue	= gEngfuncs.pfnRegisterVariable( "gl_fogblue","0.3", 0 );
+	gl_foggreen	= gEngfuncs.pfnRegisterVariable( "gl_foggreen","0.3", 0 );
+	gl_polyblend	= gEngfuncs.pfnRegisterVariable( "gl_polyblend","1", 0 );	// allow screenfade
+	gl_flashblend	= gEngfuncs.pfnRegisterVariable( "gl_flashblend","0", 0 );	// replace dlights with spheres. not used
+	r_wateralpha	= gEngfuncs.pfnRegisterVariable( "r_wateralpha","1", 0 );
+	r_waterripple	= gEngfuncs.pfnRegisterVariable( "r_waterripple","0", 0 );
+	r_oldsky		= gEngfuncs.pfnRegisterVariable( "r_oldsky","0", 0 );
+
+	v_idlescale	= gEngfuncs.pfnRegisterVariable( "v_idlescale","0", 0 );
 }

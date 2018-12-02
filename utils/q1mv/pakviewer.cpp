@@ -298,23 +298,10 @@ PAKViewer::OnLoadModel ()
 	}
 
 	g_aliasModel.FreeModel ();
-	daliashdr_t *hdr = g_aliasModel.LoadModel (str2);
-	if (!hdr)
-	{
-//		mxMessageBox (this, "Error loading model.", g_appTitle, MX_MB_OK | MX_MB_ERROR);
-		return 1;
-	}
-
-	g_MDLViewer->initAnimation(-1);
-	g_MDLViewer->setModelInfo();
-
-	g_MDLViewer->centerModel ();
-	g_GlWindow->redraw ();
+	g_MDLViewer->loadModel (str2);
 
 	return 1;
 }
-
-
 
 int
 PAKViewer::OnLoadTexture (int pos)

@@ -119,6 +119,7 @@ void CHud :: Init( void )
 	m_Message.Init();
 	m_TextMessage.Init();
 	m_Scoreboard.Init();
+	m_Sound.Init();
 
 	MsgFunc_ResetHUD( 0, 0, NULL );
 }
@@ -127,6 +128,8 @@ void CHud :: Init( void )
 // cleans up memory allocated for m_rg* arrays
 CHud :: ~CHud()
 {
+	m_Sound.Close();
+
 	if( m_pHudList )
 	{
 		HUDLIST *pList;
@@ -155,6 +158,7 @@ void CHud :: VidInit( void )
 	m_SayText.VidInit();
 	m_TextMessage.VidInit();
 	m_Scoreboard.VidInit();
+	m_Sound.VidInit();
 
 	CL_ClearBeams();
 }

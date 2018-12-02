@@ -432,3 +432,60 @@ mleaf_t *Mod_PointInLeaf( Vector p, mnode_t *node )
 	// never reached
 	return NULL;
 }
+
+/*
+====================
+Sys LoadGameDLL
+
+====================
+*/
+bool Sys_LoadLibrary( const char* dllname, dllhandle_t* handle, const dllfunc_t *fcts )
+{
+	if( !handle ) return false;
+
+	const dllfunc_t *gamefunc;
+
+	// Initializations
+	for( gamefunc = fcts; gamefunc && gamefunc->name != NULL; gamefunc++ )
+		*gamefunc->func = NULL;
+
+	char dllpath[128];
+
+	// is direct path used ?
+	if( dllname[0] == '*' ) strncpy( dllpath, dllname + 1, sizeof( dllpath ) - 1 );
+	else sprintf( dllpath, "%s/bin/%s", gEngfuncs.pfnGetGameDirectory(), dllname );
+
+	dllhandle_t dllhandle = LoadLibrary( dllpath );
+        
+	// No DLL found
+	if( !dllhandle ) return false;
+
+	// Get the function adresses
+	for( gamefunc = fcts; gamefunc && gamefunc->name != NULL; gamefunc++ )
+	{
+		if( !( *gamefunc->func = (void *)Sys_GetProcAddress( dllhandle, gamefunc->name )))
+		{
+			Sys_FreeLibrary( &dllhandle );
+			return false;
+		}
+	}          
+
+	gEngfuncs.Con_DPrintf( "%s loaded succesfully!\n", (dllname[0] == '*') ? (dllname+1) : (dllname));
+	*handle = dllhandle;
+
+	return true;
+}
+
+void *Sys_GetProcAddress( dllhandle_t handle, const char *name )
+{
+	return (void *)GetProcAddress( handle, name );
+}
+
+void Sys_FreeLibrary( dllhandle_t *handle )
+{
+	if( !handle || !*handle )
+		return;
+
+	FreeLibrary( *handle );
+	*handle = NULL;
+}

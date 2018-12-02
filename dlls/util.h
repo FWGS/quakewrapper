@@ -34,11 +34,6 @@ extern globalvars_t			*gpGlobals;
 // Testing the three types of "entity" for nullity
 #define eoNullEntity 0
 
-// Keeps clutter down a bit, when using a float as a bit-vector
-#define SetBits(flBitVector, bits)		((flBitVector) = (int)(flBitVector) | (bits))
-#define ClearBits(flBitVector, bits)	((flBitVector) = (int)(flBitVector) & ~(bits))
-#define FBitSet(flBitVector, bit)		((int)(flBitVector) & (bit))
-
 // Makes these more explicit, and easier to find
 #define DLL_GLOBAL
 
