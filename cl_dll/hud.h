@@ -183,8 +183,6 @@ private:
 
 	char	levelname[80];
 	float	completed_time;
-
-	int	gametype;
 };
 
 //
@@ -440,6 +438,7 @@ public:
 
 extern CHud gHUD;
 
+extern int g_iGameType;
 extern int g_iPlayerClass;
 extern int g_iTeamNumber;
 extern int g_iUser1;

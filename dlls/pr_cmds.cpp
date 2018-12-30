@@ -387,7 +387,9 @@ void PF_setmodel( void )
 	{
 		// FIXME: kRenderTransAlpha doesn't have lerping between frames
 		// but looks better than kRenderTransAdd. What i should choose?
-		pent->v.rendermode = kRenderTransAlpha;
+		if( UTIL_CheckSpriteFullBright( mod ))
+			pent->v.rendermode = kRenderTransAlpha;
+		else pent->v.rendermode = kRenderNormal;
 		pent->v.renderamt = 255;
 	}
 
@@ -1070,8 +1072,12 @@ void PF_remove( void )
 	if( !PR_ValidateArgs( "remove", 1 ) || pr.precache )
 		return;
 
+	if( G_INT( OFS_PARM0 ) <= 0 || G_INT( OFS_PARM0 ) >= gpGlobals->maxEntities )
+		return; // invalid entity
+
 	edict_t *ent = G_EDICT( OFS_PARM0 );
 	pr_entvars_t *pev = (pr_entvars_t *)GET_PRIVATE( ent );
+	if( !pev ) return;	// invalid acess
 
 	// NOTE: we can't remove entity immediately because
 	// we using non-solid array with dynamically reallocated pointers

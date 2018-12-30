@@ -25,6 +25,7 @@ enum m_state_e
 {
 	m_none, 
 	m_main, 
+	m_demo, 
 	m_singleplayer, 
 	m_load, 
 	m_save, 
@@ -109,16 +110,27 @@ qboolean	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
 qboolean	m_recursiveDraw;
 
-int			m_return_state;
+int	m_return_state;
 qboolean	m_return_onerror;
-char		m_return_reason [32];
+char	m_return_reason [32];
 
 #define StartingGame	(m_multiplayer_cursor == 1)
 #define JoiningGame		(m_multiplayer_cursor == 0)
 #define SerialConfig	(m_net_cursor == 0)
 #define DirectConfig	(m_net_cursor == 1)
-#define	IPXConfig		(m_net_cursor == 2)
-#define	TCPIPConfig		(m_net_cursor == 3)
+#define IPXConfig		(m_net_cursor == 2)
+#define TCPIPConfig		(m_net_cursor == 3)
+
+// Nehahra
+int NumberOfDemos;
+typedef struct
+{
+	char name[50];
+	char desc[50];
+} demonames_t;
+
+demonames_t	Demos[35];
+int		demo_cursor;
 
 // void M_ConfigureNetSubsystem(void);
 
@@ -331,8 +343,6 @@ void M_DrawTextBox (int x, int y, int width, int lines)
 
 int m_save_demonum;
 
-
-
 /*
 ================
 M_ToggleMenu_f
@@ -365,16 +375,117 @@ void UI_SetActiveMenu ( int fActive )
 	}
 }
 
+void M_Demo_Draw( void )
+{
+	int	i;
+
+	for( i = 0; i < NumberOfDemos; i++ )
+		M_PrintWhite( 16, 16 + 8 * i, Demos[i].desc );
+
+	// line cursor
+	M_DrawCharacter( 8, 16 + demo_cursor * 8, 12 + ((int)(realtime*4)&1));
+}
+
+
+void M_Menu_Demos_f (void)
+{
+	UI_SetActiveMenu( 1 );
+	m_state = m_demo;
+	m_entersound = true;
+
+	NumberOfDemos = 34;
+
+	strcpy(Demos[0].name,  "INTRO");         strcpy(Demos[0].desc,  "Prologue");
+	strcpy(Demos[1].name,  "GENF");          strcpy(Demos[1].desc,  "The Beginning");
+	strcpy(Demos[2].name,  "GENLAB");        strcpy(Demos[2].desc,  "A Doomed Project");
+	strcpy(Demos[3].name,  "NEHCRE");        strcpy(Demos[3].desc,  "The New Recruits");
+	strcpy(Demos[4].name,  "MAXNEH");        strcpy(Demos[4].desc,  "Breakthrough");
+	strcpy(Demos[5].name,  "MAXCHAR");       strcpy(Demos[5].desc,  "Renewal and Duty");
+	strcpy(Demos[6].name,  "CRISIS");        strcpy(Demos[6].desc,  "Worlds Collide");
+	strcpy(Demos[7].name,  "POSTCRIS");      strcpy(Demos[7].desc,  "Darkening Skies");
+	strcpy(Demos[8].name,  "HEARING");       strcpy(Demos[8].desc,  "The Hearing");
+	strcpy(Demos[9].name,  "GETJACK");       strcpy(Demos[9].desc,  "On a Mexican Radio");
+	strcpy(Demos[10].name, "PRELUDE");       strcpy(Demos[10].desc, "Honor and Justice");
+	strcpy(Demos[11].name, "ABASE");         strcpy(Demos[11].desc, "A Message Sent");
+	strcpy(Demos[12].name, "EFFECT");        strcpy(Demos[12].desc, "The Other Side");
+	strcpy(Demos[13].name, "UHOH");          strcpy(Demos[13].desc, "Missing in Action");
+	strcpy(Demos[14].name, "PREPARE");       strcpy(Demos[14].desc, "The Response");
+	strcpy(Demos[15].name, "VISION");        strcpy(Demos[15].desc, "Farsighted Eyes");
+	strcpy(Demos[16].name, "MAXTURNS");      strcpy(Demos[16].desc, "Enter the Immortal");
+	strcpy(Demos[17].name, "BACKLOT");       strcpy(Demos[17].desc, "Separate Ways");
+	strcpy(Demos[18].name, "MAXSIDE");       strcpy(Demos[18].desc, "The Ancient Runes");
+	strcpy(Demos[19].name, "COUNTER");       strcpy(Demos[19].desc, "The New Initiative");
+	strcpy(Demos[20].name, "WARPREP");       strcpy(Demos[20].desc, "Ghosts to the World");
+	strcpy(Demos[21].name, "COUNTER1");      strcpy(Demos[21].desc, "A Fate Worse Than Death");
+	strcpy(Demos[22].name, "COUNTER2");      strcpy(Demos[22].desc, "Friendly Fire");
+	strcpy(Demos[23].name, "COUNTER3");      strcpy(Demos[23].desc, "Minor Setback");
+	strcpy(Demos[24].name, "MADMAX");        strcpy(Demos[24].desc, "Scores to Settle");
+	strcpy(Demos[25].name, "QUAKE");         strcpy(Demos[25].desc, "One Man");
+	strcpy(Demos[26].name, "CTHMM");         strcpy(Demos[26].desc, "Shattered Masks");
+	strcpy(Demos[27].name, "SHADES");        strcpy(Demos[27].desc, "Deal with the Dead");
+	strcpy(Demos[28].name, "GOPHIL");        strcpy(Demos[28].desc, "An Unlikely Hero");
+	strcpy(Demos[29].name, "CSTRIKE");       strcpy(Demos[29].desc, "War in Hell");
+	strcpy(Demos[30].name, "SHUBSET");       strcpy(Demos[30].desc, "The Conspiracy");
+	strcpy(Demos[31].name, "SHUBDIE");       strcpy(Demos[31].desc, "Even Death May Die");
+	strcpy(Demos[32].name, "NEWRANKS");      strcpy(Demos[32].desc, "An Empty Throne");
+	strcpy(Demos[33].name, "SEAL");          strcpy(Demos[33].desc, "The Seal is Broken");
+
+	// find the last demo what we seeing
+	for( int i = 0; i < NumberOfDemos; i++ )
+	{
+		if( !stricmp( Demos[i].name, Cvar_GetString( "lastdemo" )))
+		{
+			demo_cursor = i;
+			break;
+		}
+
+	}
+}
+
+void M_Demo_Key( int k )
+{
+	switch( k )
+	{
+	case K_ESCAPE:
+		M_Menu_Main_f ();
+		break;
+	case K_ENTER:
+		S_LocalSound ("misc/menu2.wav");
+		m_state = m_none;
+		UI_SetActiveMenu(0);
+		engfuncs.pfnClientCmd( FALSE, va ("playdemo %s 1\n", Demos[demo_cursor].name));
+		return;
+	case K_UPARROW:
+	case K_LEFTARROW:
+		S_LocalSound ("misc/menu1.wav");
+		demo_cursor--;
+		if (demo_cursor < 0)
+			demo_cursor = NumberOfDemos - 1;
+		break;
+	case K_DOWNARROW:
+	case K_RIGHTARROW:
+		S_LocalSound ("misc/menu1.wav");
+		demo_cursor++;
+		if (demo_cursor > NumberOfDemos - 1 )
+			demo_cursor = 0;
+		break;
+	}
+}
 		
 //=============================================================================
 /* MAIN MENU */
 
 int	m_main_cursor;
-#define	MAIN_ITEMS	5
-
+int	MAIN_ITEMS = 5;
 
 void M_Menu_Main_f (void)
 {
+	if( nehahra == TYPE_NEHDEMO )
+		MAIN_ITEMS = 4;
+	else if( nehahra == TYPE_NEHFULL )
+		MAIN_ITEMS = 6;
+	else MAIN_ITEMS = 5;
+
 	/*if (key_dest != key_menu)
 	{
 		m_save_demonum = cls.demonum;
@@ -395,9 +506,19 @@ void M_Main_Draw (void)
 	p = Draw_CachePic ("gfx/ttl_main.lmp");
 	M_DrawPic ( (320-Draw_PicWidth(p))/2, 4, p);
 
-	if( nehahra )
+	switch( nehahra )
+	{
+	case TYPE_NEHDEMO:
+		M_DrawTransPic (72, 32, Draw_CachePic ("gfx/demomenu.lmp"));
+		break;
+	case TYPE_NEHGAME:
 		M_DrawTransPic (72, 32, Draw_CachePic ("gfx/gamemenu.lmp") );
-	else M_DrawTransPic (72, 32, Draw_CachePic ("gfx/mainmenu.lmp") );
+		break;
+	default:
+		// nehahra both game and movie or all other games
+		M_DrawTransPic (72, 32, Draw_CachePic ("gfx/mainmenu.lmp") );
+		break;
+	}
 
 	f = (int)(realtime * 10)%6;
 	
@@ -435,22 +556,40 @@ void M_Main_Key (int key)
 		switch (m_main_cursor)
 		{
 		case 0:
-			M_Menu_SinglePlayer_f ();
+			if( nehahra == TYPE_NEHDEMO )
+				M_Menu_Demos_f ();
+			else M_Menu_SinglePlayer_f ();
 			break;
 
 		case 1:
-			M_Menu_MultiPlayer_f ();
+			if( nehahra == TYPE_NEHFULL )
+				M_Menu_Demos_f ();
+			else if( nehahra == TYPE_NEHDEMO )
+				M_Menu_Help_f ();
+			else if( nehahra == TYPE_CLASSIC )
+				M_Menu_MultiPlayer_f ();
 			break;
 
 		case 2:
-			M_Menu_Options_f ();
+			if( nehahra != TYPE_NEHFULL )
+				M_Menu_Options_f ();
 			break;
 
 		case 3:
-			M_Menu_Help_f ();
+			if( nehahra == TYPE_NEHDEMO )
+				M_Menu_Quit_f ();
+			else if( nehahra == TYPE_NEHFULL )
+				M_Menu_Options_f ();
+			else M_Menu_Help_f ();
 			break;
 
 		case 4:
+			if( nehahra == TYPE_NEHFULL )
+				M_Menu_Help_f ();
+			else M_Menu_Quit_f ();
+			break;
+		case 5:
+			// nehahra game & movie
 			M_Menu_Quit_f ();
 			break;
 		}
@@ -1854,13 +1993,20 @@ int		help_page;
 
 void M_Menu_Help_f (void)
 {
-	UI_SetActiveMenu( 1 );
-	m_state = m_help;
-	m_entersound = true;
-	help_page = 0;
+	if( nehahra )
+	{
+		m_state = m_none;
+		UI_SetActiveMenu(0);
+		engfuncs.pfnClientCmd( FALSE, "playdemo ENDCRED" );
+	}
+	else
+	{
+		UI_SetActiveMenu( 1 );
+		m_state = m_help;
+		m_entersound = true;
+		help_page = 0;
+	}
 }
-
-
 
 void M_Help_Draw (void)
 {
@@ -1989,32 +2135,31 @@ void M_Quit_Key (int key)
 void M_Quit_Draw (void)
 {
 	M_DrawTextBox (0, 0, 38, 23);
-	M_PrintWhite (16, 12,   "  QuakeWrapper 0.5 by Unkle Mike\n\n");
+	M_PrintWhite (16, 12,   "  QuakeWrapper 0.7 by Unkle Mike\n\n");
 	M_PrintWhite (16, 28,   "Programming        Testing \n");
 	M_Print (16, 36,        " Unkle Mike        ...\n");
 	M_Print (16, 44,        " a1batross         ...\n");
-	
-	for( int i = 0; i < 4; i++ )
+
+	if( nehahra )
 	{
-		M_PrintWhite( 16, 68 + i*8, quitMessage[msgNumber*4 + i] );
+		M_DrawTextBox (0, 0, 38, 23);
+		M_PrintWhite (16, 12,  "  Nehahra \n\n");
+		M_PrintWhite (16, 180, "Press y to exit\n");
+	}	
+	else
+	{
+		for( int i = 0; i < 4; i++ )
+		{
+			M_PrintWhite( 16, 68 + i*8, quitMessage[msgNumber*4 + i] );
+		}
+
+		M_PrintWhite (16, 140, "Quake is a trademark of Id Software,\n");
+		M_PrintWhite (16, 148, "inc., (c)1996 Id Software, inc. All\n");
+		M_PrintWhite (16, 156, "rights reserved. NIN logo is a\n");
+		M_PrintWhite (16, 164, "registered trademark licensed to\n");
+		M_PrintWhite (16, 172, "Nothing Interactive, Inc. All rights\n");
+		M_PrintWhite (16, 180, "reserved. Press y to exit\n");
 	}
-	/*M_Print (16, 52,  " \n");
-	M_Print (16, 60,  " \n");
-	M_PrintWhite (16, 68,  "\n");
-	M_Print (16, 76,  " \n");
-	M_Print (16, 84,  " \n");
-	M_Print (16, 92,  " \n");
-	M_Print (16, 100,  " \n");
-	M_PrintWhite (16, 108, "\n");
-	M_Print (16, 116, " \n");
-	M_PrintWhite (16, 124, "\n");
-	M_Print (16, 132, " \n\n");*/
-	M_PrintWhite (16, 140, "Quake is a trademark of Id Software,\n");
-	M_PrintWhite (16, 148, "inc., (c)1996 Id Software, inc. All\n");
-	M_PrintWhite (16, 156, "rights reserved. NIN logo is a\n");
-	M_PrintWhite (16, 164, "registered trademark licensed to\n");
-	M_PrintWhite (16, 172, "Nothing Interactive, Inc. All rights\n");
-	M_PrintWhite (16, 180, "reserved. Press y to exit\n");
 }
 
 //=============================================================================
@@ -3547,12 +3692,27 @@ void UI_Init(void)
 	if( !stricmp( com_gamedir, "rogue" ) ) rogue = true;
 	else if( !stricmp( com_gamedir, "hipnotic" ) ) hipnotic = true;
 	else if( !stricmp( com_gamedir, "nehahra" ) ) nehahra = true;
+
+	// run additional checks
+	if( nehahra )
+	{
+		if( FILE_EXISTS( "hearing.dem" ) && FILE_EXISTS( "maps/neh1m4.bsp" ))
+			nehahra = TYPE_NEHFULL; // complete installation
+		else if( FILE_EXISTS( "hearing.dem" ))
+			nehahra = TYPE_NEHDEMO; // only movie
+		else if( FILE_EXISTS( "maps/neh1m4.bsp" ))
+			nehahra = TYPE_NEHGAME; // only game
+		else nehahra = TYPE_CLASSIC;	// ???
+	}
 	
 	Cmd_AddCommand ("menu_main", M_Menu_Main_f);
+	if( nehahra == TYPE_NEHFULL || nehahra == TYPE_NEHDEMO )
+		Cmd_AddCommand ("menu_demos", M_Menu_Demos_f);
 	Cmd_AddCommand ("menu_singleplayer", M_Menu_SinglePlayer_f);
 	Cmd_AddCommand ("menu_load", M_Menu_Load_f);
 	Cmd_AddCommand ("menu_save", M_Menu_Save_f);
-	Cmd_AddCommand ("menu_multiplayer", M_Menu_MultiPlayer_f);
+	if( nehahra == TYPE_CLASSIC )
+		Cmd_AddCommand ("menu_multiplayer", M_Menu_MultiPlayer_f);
 	Cmd_AddCommand ("menu_setup", M_Menu_Setup_f);
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
 	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
@@ -3568,6 +3728,13 @@ void M_DrawTile()
 	
 	if( engfuncs.pfnClientInGame() && Cvar_GetValue("ui_renderworld") )
 		return;
+
+	if( nehahra )
+	{
+		// nehahra shown console image in main menu, not a tile
+		Draw_PicFull( Draw_CachePic("gfx/conback.lmp"));
+		return;
+	}
 	
 	HIMAGE hImage = Draw_CachePic("gfx/backtile.lmp");
 	int x = 0, y = 0;
@@ -3623,6 +3790,10 @@ void UI_Redraw( float flTime )
 
 	case m_main:
 		M_Main_Draw ();
+		break;
+
+	case m_demo:
+		M_Demo_Draw ();
 		break;
 
 	case m_singleplayer:
@@ -3729,6 +3900,10 @@ void UI_KeyEvent(int key, int down)
 
 	case m_main:
 		M_Main_Key (key);
+		return;
+
+	case m_demo:
+		M_Demo_Key (key);
 		return;
 
 	case m_singleplayer:

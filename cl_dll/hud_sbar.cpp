@@ -55,16 +55,16 @@ int CHudSBar::Init(void)
 	m_iFlags |= HUD_ACTIVE;
 	gHUD.AddHudElem(this);
 
-	gametype = GAMETYPE_QUAKE;
+	g_iGameType = GAMETYPE_QUAKE;
 
 	COM_FileBase( gEngfuncs.pfnGetGameDirectory(), gamedir );
 
 	if( !Q_stricmp( gamedir, "hipnotic" ) || !Q_stricmp( gamedir, "quoth" ))
-		gametype = GAMETYPE_HIPNOTIC;
+		g_iGameType = GAMETYPE_HIPNOTIC;
 	else if( !Q_stricmp( gamedir, "rogue" ))
-		gametype = GAMETYPE_ROGUE;
+		g_iGameType = GAMETYPE_ROGUE;
 	else if( !Q_stricmp( gamedir, "nehahra" ))
-		gametype = GAMETYPE_NEHAHRA;
+		g_iGameType = GAMETYPE_NEHAHRA;
 
 	return 1;
 };
@@ -159,7 +159,7 @@ int CHudSBar::VidInit( void )
 	sb_scorebar = gHUD.DrawPicFromWad ("scorebar");
 
 //MED 01/04/97 added new hipnotic weapons
-	if (gametype == GAMETYPE_HIPNOTIC)
+	if (g_iGameType == GAMETYPE_HIPNOTIC)
 	{
 		hsb_weapons[0][0] = gHUD.DrawPicFromWad ("inv_laser");
 		hsb_weapons[0][1] = gHUD.DrawPicFromWad ("inv_mjolnir");
@@ -186,7 +186,7 @@ int CHudSBar::VidInit( void )
 		hsb_items[1] = gHUD.DrawPicFromWad ("sb_eshld");
 	}
 
-	if (gametype == GAMETYPE_ROGUE)
+	if (g_iGameType == GAMETYPE_ROGUE)
 	{
 		rsb_invbar[0] = gHUD.DrawPicFromWad ("r_invbar1");
 		rsb_invbar[1] = gHUD.DrawPicFromWad ("r_invbar2");
@@ -379,7 +379,7 @@ void CHudSBar::DrawInventory( float flTime )
 	float	time;
 	int	i, flashon;
 
-	if (gametype == GAMETYPE_ROGUE)
+	if (g_iGameType == GAMETYPE_ROGUE)
 	{
 		if( gHUD.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
 			DrawPic( 0, -24, rsb_invbar[0] );
@@ -412,7 +412,7 @@ void CHudSBar::DrawInventory( float flTime )
 
 	// MED 01/04/97
 	// hipnotic weapons
-	if (gametype == GAMETYPE_HIPNOTIC)
+	if (g_iGameType == GAMETYPE_HIPNOTIC)
 	{
 		int grenadeflashing = 0;
 		for( i = 0; i < 4; i++ )
@@ -467,7 +467,7 @@ void CHudSBar::DrawInventory( float flTime )
 		}
 	}
 
-	if (gametype == GAMETYPE_ROGUE)
+	if (g_iGameType == GAMETYPE_ROGUE)
 	{
 		// check for powered up weapon.
 		if( gHUD.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
@@ -511,7 +511,7 @@ void CHudSBar::DrawInventory( float flTime )
 			else
 			{
 				//MED 01/04/97 changed keys
-				if( gametype != GAMETYPE_HIPNOTIC || (i > 1))
+				if( g_iGameType != GAMETYPE_HIPNOTIC || (i > 1))
 				{
 					DrawPic( 192 + i * 16, -16, sb_items[i] );
 				}
@@ -521,7 +521,7 @@ void CHudSBar::DrawInventory( float flTime )
 
 	//MED 01/04/97 added hipnotic items
 	// hipnotic items
-	if (gametype == GAMETYPE_HIPNOTIC)
+	if (g_iGameType == GAMETYPE_HIPNOTIC)
 	{
 		for (i=0 ; i<2 ; i++)
 		{
@@ -540,7 +540,7 @@ void CHudSBar::DrawInventory( float flTime )
 		}
 	}
 
-	if (gametype == GAMETYPE_ROGUE)
+	if (g_iGameType == GAMETYPE_ROGUE)
 	{
 		// new rogue items
 		for( i = 0; i < 2; i++ )
@@ -625,8 +625,8 @@ int CHudSBar::Draw(float fTime)
 
 	if ((gEngfuncs.GetMaxClients() == 1 ) && (gHUD.showscores || gHUD.stats[STAT_HEALTH] <= 0))
 		return 1;
-#if 0
-	if (gHUD.sb_lines <= 0)
+#if 1
+	if (gHUD.sb_lines <= 0 && g_iGameType == GAMETYPE_NEHAHRA )
 		return 1;
 #endif
 	DrawFace( fTime );
@@ -636,7 +636,7 @@ int CHudSBar::Draw(float fTime)
 
 	// keys (hipnotic only)
 	//MED 01/04/97 moved keys here so they would not be overwritten
-	if (gametype == GAMETYPE_HIPNOTIC)
+	if (g_iGameType == GAMETYPE_HIPNOTIC)
 	{
 		if (gHUD.items & IT_KEY1)
 			DrawPic (209, 3, sb_items[0]);
@@ -652,7 +652,7 @@ int CHudSBar::Draw(float fTime)
 	}
 	else
 	{
-		if (gametype == GAMETYPE_ROGUE)
+		if (g_iGameType == GAMETYPE_ROGUE)
 		{
 			DrawNum( 24, 0, gHUD.stats[STAT_ARMOR], 3, gHUD.stats[STAT_ARMOR] <= 25 );
 
@@ -677,7 +677,7 @@ int CHudSBar::Draw(float fTime)
 	}
 
 	// ammo icon
-	if (gametype == GAMETYPE_ROGUE)
+	if (g_iGameType == GAMETYPE_ROGUE)
 	{
 		if (gHUD.items & RIT_SHELLS)
 			DrawPic (224, 0, sb_ammo[0]);

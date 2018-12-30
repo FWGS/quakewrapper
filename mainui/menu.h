@@ -29,6 +29,12 @@ enum
 	KEY_MENU
 };
 
+// NEHAHRA types
+#define TYPE_CLASSIC	0	// not a nehahra
+#define TYPE_NEHGAME	1
+#define TYPE_NEHDEMO	2
+#define TYPE_NEHFULL	3
+
 #define MAX_INFO_STRING 128
 
 const char *Info_ValueForKey( const char *infostring, const char *key );
@@ -57,6 +63,7 @@ const char *Info_ValueForKey( const char *infostring, const char *key );
 #define Con_DPrintf engfuncs.pfnCon_DPrintf
 
 #define CL_IsActive()	(engfuncs.pfnClientInGame() && !Cvar_GetValue( "cl_background" ))
+#define FILE_EXISTS( file )	(*engfuncs.pfnFileExists)( file, FALSE )
 
 #define MAX_CLIENTS 32
 
@@ -97,6 +104,12 @@ inline void Draw_Pic( int x, int y, HIMAGE pic )
 {
 	engfuncs.pfnPIC_Set( pic, 255, 255, 255, 255 );
 	engfuncs.pfnPIC_Draw( x, y, -1, -1, NULL );
+}
+
+inline void Draw_PicFull( HIMAGE pic )
+{
+	engfuncs.pfnPIC_Set( pic, 255, 255, 255, 255 );
+	engfuncs.pfnPIC_Draw( 0, 0, gpGlobals->scrWidth, gpGlobals->scrHeight, NULL );
 }
 
 inline bool Con_ToggleConsole_f( void )

@@ -312,7 +312,7 @@ void ClientCommand( edict_t *pEntity )
 		edict_t *world = INDEXENT( 0 );
 		pr_entvars_t *pevWorld = (pr_entvars_t *)GET_PRIVATE( world );
 
-		fog_settings[0] = atof( CMD_ARGV( 1 ));	// density
+		fog_settings[0] = atof( CMD_ARGV( 1 )) * 1.5625f;	// density
 		fog_settings[1] = atof( CMD_ARGV( 2 ));	// red
 		fog_settings[2] = atof( CMD_ARGV( 3 ));	// green
 		fog_settings[3] = atof( CMD_ARGV( 4 ));	// blue
@@ -803,7 +803,7 @@ Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 */
 const char *GetGameDescription()
 {
-	return "Quake Wrapper v0.6";
+	return "Quake Wrapper v0.7";
 }
 
 /*

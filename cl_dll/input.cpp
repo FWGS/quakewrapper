@@ -988,6 +988,7 @@ void ShutdownInput (void)
 {
 	IN_Shutdown();
 	KB_Shutdown();
+	gHUD.m_Sound.Close();
 }
 
 void DLLEXPORT HUD_Shutdown( void )

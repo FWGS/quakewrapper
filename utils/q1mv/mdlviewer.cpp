@@ -1466,7 +1466,7 @@ int main( int argc, char *argv[] )
 	if( g_viewerSettings.showMaximized )
 		g_MDLViewer->Maximize();
 
-	if (strstr (cmdline, ".mdl"))
+	if (Q_stristr (cmdline, ".mdl"))
 	{
 		g_MDLViewer->loadModel (cmdline);
 	}

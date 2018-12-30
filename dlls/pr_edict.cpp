@@ -740,6 +740,10 @@ static char *ED_ParseEdict( char *data, edict_t *ent )
 			int packed_fog[4];
 			UTIL_StringToFloatArray( fog_settings, 4, token );
 
+			// NOTE: NEHAHRA and Xash3D fog divider is 100, Arcane Dimensions fog divider is 64
+			// premultiply AD density to match value 
+			fog_settings[0] *= 1.5625f;
+
 			for( int i = 0; i < 4; i++)
 				packed_fog[i] = fog_settings[i] * 255;
 
@@ -849,8 +853,11 @@ void ED_PrecacheEdict( edict_t *ent, pr_entvars_t *pev )
 		case mod_sprite:
 			// FIXME: kRenderTransAlpha doesn't have lerping between frames
 			// but looks better than kRenderTransAdd. What i should choose?
-			ent->v.rendermode = kRenderTransAlpha;
+			if( UTIL_CheckSpriteFullBright( mod ))
+				ent->v.rendermode = kRenderTransAlpha;
+			else ent->v.rendermode = kRenderNormal;
 			ent->v.renderamt = 255;
+
 			break;
 		case mod_brush:
 			break;
@@ -869,7 +876,7 @@ this entity and alloc pvPrivateData (original VM code completely does not checki
 */
 void ED_InitEdict( edict_t *ent )
 {
-	ALERT( at_error, "PR_ExecuteProgram: caused to access to freed entity %i\n", ENTINDEX( ent ));
+	ALERT( at_aiconsole, "PR_ExecuteProgram: caused to access to freed entity %i\n", ENTINDEX( ent ));
 
 	if( !ent->pvPrivateData )
 		ALLOC_PRIVATE( ent, pr.progs->entityfields * 4 );

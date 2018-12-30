@@ -429,7 +429,7 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				tempMessage->b2 = 0;
 				tempMessage->a2 = 0;
 				tempMessage->x = -1;		// Centered
-				tempMessage->y = 0.7;
+				tempMessage->y = 0.35;
 				tempMessage->fadein = 0.01;
 				tempMessage->fadeout = 1.5;
 				tempMessage->fxtime = 0.25;

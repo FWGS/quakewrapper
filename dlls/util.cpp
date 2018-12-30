@@ -23,6 +23,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "game.h"
+#include "com_model.h"
 
 float anglemod(float a)
 {
@@ -178,4 +179,12 @@ void UTIL_LogPrintf( char *fmt, ... )
 
 	// Print to server console
 	ALERT( at_logged, "%s", string );
+}
+
+BOOL UTIL_CheckSpriteFullBright( model_t *mod )
+{
+	for( int i = 0; i < 64 && mod->name[i]; i++ )
+		if( mod->name[i] == '!' )
+			return FALSE;
+	return TRUE;
 }

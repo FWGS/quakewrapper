@@ -28,6 +28,7 @@ extern client_sprite_t	*GetSpriteList(client_sprite_t *pList, const char *psz, i
 hud_player_info_t		g_PlayerInfoList[MAX_PLAYERS+1];	// player info from the engine
 extra_player_info_t		g_PlayerExtraInfo[MAX_PLAYERS+1];	// additional player info sent directly to the client dll
 team_info_t		g_TeamInfo[MAX_TEAMS+1];
+int			g_iGameType;
 
 extern cvar_t *sensitivity;
 cvar_t *cl_lw = NULL;
@@ -128,8 +129,6 @@ void CHud :: Init( void )
 // cleans up memory allocated for m_rg* arrays
 CHud :: ~CHud()
 {
-	m_Sound.Close();
-
 	if( m_pHudList )
 	{
 		HUDLIST *pList;

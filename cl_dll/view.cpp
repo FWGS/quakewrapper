@@ -1076,24 +1076,28 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 
 void V_UpdateFog( struct ref_params_s *pparams )
 {
+	// nehahra-specific controls
+	if( g_iGameType != GAMETYPE_NEHAHRA )
+		return;
+
 	if( FBitSet( gl_fogenable->flags|gl_fogdensity->flags|gl_fogred->flags|gl_foggreen->flags|gl_fogblue->flags, FCVAR_CHANGED ))
 	{
 		if( CVAR_TO_BOOL( gl_fogenable ))
 		{
 			int	packed_fog[4];
 
-			packed_fog[0] = (gl_fogdensity->value * gl_fogdensity->value * 32.0f) * 255;	// FIXME: tune multiplier
+			packed_fog[0] = (gl_fogdensity->value) * 255;
 			packed_fog[1] = (gl_fogred->value) * 255;
 			packed_fog[2] = (gl_foggreen->value) * 255;
 			packed_fog[3] = (gl_fogblue->value) * 255;
 
 			// pack setttings into single variable
 			pparams->movevars->fog_settings = (packed_fog[1]<<24)|(packed_fog[2]<<16)|(packed_fog[3]<<8)|packed_fog[0];
-			gEngfuncs.Con_Printf( "fog changed to: %g %g %g : %g\n", gl_fogred->value, gl_foggreen->value, gl_fogblue->value, gl_fogdensity->value );
+//			gEngfuncs.Con_Printf( "fog changed to: %g %g %g : %g\n", gl_fogred->value, gl_foggreen->value, gl_fogblue->value, gl_fogdensity->value );
 		}
 		else
 		{
-			gEngfuncs.Con_Printf( "fog disabled\n" );
+//			gEngfuncs.Con_Printf( "fog disabled\n" );
 			pparams->movevars->fog_settings = 0;
 		}
 
@@ -1108,27 +1112,19 @@ void V_UpdateFog( struct ref_params_s *pparams )
 	{
 		pparams->movevars->wateralpha = r_wateralpha->value;
 		ClearBits( r_wateralpha->flags, FCVAR_CHANGED );
-		gEngfuncs.Con_Printf( "water alpha set to %g\n", pparams->movevars->wateralpha );
 	}
 
 	if( FBitSet( r_waterripple->flags, FCVAR_CHANGED ))
 	{
 		gEngfuncs.GetEntityByIndex( 0 )->curstate.scale = r_waterripple->value * (1.0f/8.0f);	// FIXME: tune multiplier
-		gEngfuncs.Con_Printf( "water waveheight set to %g\n", gEngfuncs.GetEntityByIndex( 0 )->curstate.scale );
 		ClearBits( r_waterripple->flags, FCVAR_CHANGED );
 	}
 
 	if( FBitSet( r_oldsky->flags, FCVAR_CHANGED ))
 	{
 		if( CVAR_TO_BOOL( r_oldsky ))
-		{
-			gEngfuncs.Con_Printf( "sky reset to Quake\n" );
 			gEngfuncs.pfnClientCmd( "loadsky \"\"" );
-		}
-		else
-		{
-			gEngfuncs.pfnClientCmd( UTIL_VarArgs( "loadsky %s", pparams->movevars->skyName ));
-		}
+		else gEngfuncs.pfnClientCmd( UTIL_VarArgs( "loadsky %s", pparams->movevars->skyName ));
 		ClearBits( r_oldsky->flags, FCVAR_CHANGED );
 	}
 }
