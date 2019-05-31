@@ -17,11 +17,8 @@ LOCAL_CPPFLAGS := $(LOCAL_CFLAGS)
 
 LOCAL_C_INCLUDES := $(SDL_PATH)/include \
 		    $(LOCAL_PATH)/. \
-		    $(LOCAL_PATH)/wpn_shared \
 		    $(LOCAL_PATH)/../common \
-		    $(LOCAL_PATH)/../engine/common \
 		    $(LOCAL_PATH)/../engine \
-		    $(LOCAL_PATH)/../public \
 		    $(LOCAL_PATH)/../pm_shared \
 		    $(LOCAL_PATH)/../game_shared
 
