@@ -47,6 +47,10 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+### Waf ###
+*.lock*
+*.waf*
+*.pyc
 
 ### CMake ###
 CMakeCache.txt
