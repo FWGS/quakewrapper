@@ -31,8 +31,7 @@ typedef float vec_t;
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
 #include "util_vector.h"
-#define EXPORT	_declspec( dllexport )
-
+#include "exportdef.h"
 #include "../engine/cdll_int.h"
 #include "../dlls/quakedef.h"
 #include "render_api.h"

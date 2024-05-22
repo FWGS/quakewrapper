@@ -29,16 +29,17 @@ extern "C"
 }
 
 #include <string.h>
+#ifdef _WIN32
 #include <windows.h>
-
-#define DLLEXPORT __declspec( dllexport )
+#endif
+#include "exportdef.h"
 
 
 cl_enginefunc_t gEngfuncs;
 render_api_t gRenderfuncs;
 CHud gHUD;
-int g_iXashEngine = FALSE;
-BOOL g_fRenderInitialized = FALSE;
+bool g_iXashEngine = false;
+static bool g_fRenderInitialized = false;
 void InitInput (void);
 void EV_HookEvents( void );
 void IN_Commands( void );
@@ -80,6 +81,7 @@ HUD_GetRect
 Vgui stub
 ================================
 */
+#ifdef _WIN32
 int *HUD_GetRect( void )
 {
 	RECT wrect;
@@ -102,8 +104,21 @@ int *HUD_GetRect( void )
 			extent[3] = wrect.bottom - 4;	//-4
 		}
 	}
-	return extent;	
+	return extent;
 }
+#else
+int *HUD_GetRect( void )
+{
+	static int extent[4];
+
+	extent[0] = gEngfuncs.GetWindowCenterX() - ScreenWidth / 2;
+	extent[1] = gEngfuncs.GetWindowCenterY() - ScreenHeight / 2;
+	extent[2] = gEngfuncs.GetWindowCenterX() + ScreenWidth / 2;
+	extent[3] = gEngfuncs.GetWindowCenterY() + ScreenHeight / 2;
+
+	return extent;
+}
+#endif
 
 /*
 ================================
@@ -201,7 +216,7 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
 	if (gEngfuncs.pfnGetCvarPointer( "host_clientloaded" ))
-		g_iXashEngine = TRUE;
+		g_iXashEngine = true;
 
 	return 1;
 }
@@ -368,7 +383,7 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 {
 	if ( !callback || !renderfuncs || version != CL_RENDER_INTERFACE_VERSION )
 	{
-		return FALSE;
+		return false;
 	}
 
 	size_t iImportSize = sizeof( render_interface_t );
@@ -380,7 +395,7 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 	// fill engine callbacks
 	memcpy( callback, &gRenderInterface, iImportSize );
 
-	g_fRenderInitialized = TRUE;
+	g_fRenderInitialized = true;
 
-	return TRUE;
+	return true;
 }

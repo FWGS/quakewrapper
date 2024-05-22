@@ -28,6 +28,10 @@
 #include "wrect.h"
 #include "cl_dll.h"
 
+#ifndef _WIN32
+#define _cdecl
+#endif // _WIN32
+
 #define SBAR_HEIGHT		24
 #define MAX_SCRAPS		2
 #define BLOCK_WIDTH		256

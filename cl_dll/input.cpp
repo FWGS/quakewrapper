@@ -41,7 +41,7 @@ extern "C"
 extern engine_studio_api_t IEngineStudio;
 
 extern int g_iAlive;
-extern int g_iXashEngine;
+extern bool g_iXashEngine;
 extern cl_enginefunc_t gEngfuncs;
 
 void IN_Init (void);

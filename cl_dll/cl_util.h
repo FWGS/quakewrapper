@@ -17,7 +17,11 @@
 //
 
 #include "cvardef.h"
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 #ifndef TRUE
 #define TRUE 1
@@ -33,14 +37,14 @@
 
 #define DECLARE_MESSAGE(y, x) int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
 							{ \
-							return gHUD.##y.MsgFunc_##x(pszName, iSize, pbuf ); \
+							return gHUD.y.MsgFunc_##x(pszName, iSize, pbuf ); \
 							}
 
 
 #define HOOK_COMMAND(x, y) gEngfuncs.pfnAddCommand( x, __CmdFunc_##y );
 #define DECLARE_COMMAND(y, x) void __CmdFunc_##x( void ) \
 							{ \
-								gHUD.##y.UserCmd_##x( ); \
+								gHUD.y.UserCmd_##x( ); \
 							}
 
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
@@ -184,7 +188,11 @@ void	AngleQuaternion( float *angles, vec4_t quaternion );
 
 struct mleaf_s *Mod_PointInLeaf( Vector p, struct mnode_s *node );
 
+#ifdef _WIN32
 typedef HMODULE dllhandle_t;
+#else
+typedef void* dllhandle_t;
+#endif
 
 typedef struct dllfunc_s
 {

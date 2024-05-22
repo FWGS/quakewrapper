@@ -9,13 +9,13 @@
 #define IN_DEFSH
 #pragma once
 
+#include "exportdef.h"
+
 // up / down
 #define	PITCH	0
 // left / right
 #define	YAW		1
 // fall over
 #define	ROLL	2 
-
-#define DLLEXPORT __declspec( dllexport )
 
 #endif

@@ -15,7 +15,16 @@
 #include "camera.h"
 #include "in_defs.h"
 #include "cl_entity.h"
+#ifdef _WIN32
 #include "windows.h"
+#else
+typedef struct point_s
+{
+	int x, y;
+} POINT;
+#define GetCursorPos(x)
+#define SetCursorPos(x,y)
+#endif
 
 float CL_KeyState (kbutton_t *key);
 

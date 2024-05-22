@@ -18,9 +18,9 @@
 // implementation of class-less helper functions
 //
 
-#include "STDIO.H"
-#include "STDLIB.H"
-#include "MATH.H"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include "hud.h"
 #include "cl_util.h"
@@ -28,8 +28,6 @@
 #include <stdarg.h>
 #include "in_defs.h"
 #include "com_model.h"
-
-vec3_t vec3_origin( 0, 0, 0 );
 
 double sqrt(double x);
 
@@ -455,8 +453,12 @@ bool Sys_LoadLibrary( const char* dllname, dllhandle_t* handle, const dllfunc_t 
 	if( dllname[0] == '*' ) strncpy( dllpath, dllname + 1, sizeof( dllpath ) - 1 );
 	else sprintf( dllpath, "%s/bin/%s", gEngfuncs.pfnGetGameDirectory(), dllname );
 
+#ifdef _WIN32
 	dllhandle_t dllhandle = LoadLibrary( dllpath );
-        
+#else
+	dllhandle_t dllhandle = dlopen( dllpath, RTLD_NOW | RTLD_LOCAL );
+#endif
+
 	// No DLL found
 	if( !dllhandle ) return false;
 
@@ -478,7 +480,11 @@ bool Sys_LoadLibrary( const char* dllname, dllhandle_t* handle, const dllfunc_t 
 
 void *Sys_GetProcAddress( dllhandle_t handle, const char *name )
 {
+#ifdef _WIN32
 	return (void *)GetProcAddress( handle, name );
+#else
+	return (void *)dlsym( handle, name );
+#endif
 }
 
 void Sys_FreeLibrary( dllhandle_t *handle )
@@ -486,6 +492,10 @@ void Sys_FreeLibrary( dllhandle_t *handle )
 	if( !handle || !*handle )
 		return;
 
+#ifdef _WIN32
 	FreeLibrary( *handle );
+#else
+	dlclose( *handle );
+#endif
 	*handle = NULL;
 }

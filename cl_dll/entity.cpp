@@ -22,8 +22,7 @@
 #include "pm_shared.h"
 #include "r_studioint.h"
 #include "com_model.h"
-
-#define DLLEXPORT __declspec( dllexport )
+#include "exportdef.h"
 
 void VectorAngles( const float *forward, float *angles );
 
