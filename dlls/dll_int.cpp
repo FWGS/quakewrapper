@@ -190,11 +190,13 @@ void OnFreeEntPrivateData( edict_s *pEdict )
 {
 }
 
+#ifdef _WIN32
 // Required DLL entry point
 BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	return TRUE;
 }
+#endif // _WIN32
 
 void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
 {

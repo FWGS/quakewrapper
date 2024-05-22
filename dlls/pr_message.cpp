@@ -228,7 +228,8 @@ void PR_SendMessage( void )
 		return;
 	}
 
-	for( int msg_num = 0; msg_num < pr.num_messages; )
+	int msg_num;
+	for( msg_num = 0; msg_num < pr.num_messages; )
 	{
 		pr_message_t *msg = &pr.messages[msg_num];
 

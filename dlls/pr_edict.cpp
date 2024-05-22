@@ -515,24 +515,25 @@ void ED_Print( edict_t *ed )
 
 		if( name[Q_strlen( name ) - 2] == '_' )
 			continue; // skip _x, _y, _z vars
-			
+
 		int *v = (int *)((char *)ed->pvPrivateData + d->ofs * 4);
 
 		// if the value is still all 0, skip the field
 		int type = d->type & ~DEF_SAVEGLOBAL;
-		
-		for( int j = 0; j < gProgSizes[type]; j++ )
+
+		int j;
+		for( j = 0; j < gProgSizes[type]; j++ )
 			if( v[j] ) break;
 
 		if( j == gProgSizes[type] )
 			continue;
-	
+
 		ALERT( at_console, "%s", name );
 		int l = Q_strlen( name );
 		while( l++ < 15 )
 			ALERT( at_console, " " );
 
-		ALERT( at_console, "%s\n", PR_ValueString( d->type, (eval_t *)v ));		
+		ALERT( at_console, "%s\n", PR_ValueString( d->type, (eval_t *)v ));
 	}
 }
 
