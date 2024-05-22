@@ -1,0 +1,44 @@
+#! /usr/bin/env python
+# encoding: utf-8
+# a1batross, mittorn, 2018
+
+from waflib import Utils
+import os
+
+def options(opt):
+	return
+
+def configure(conf):
+	return
+
+def build(bld):
+	source = bld.path.ant_glob('**/*.cpp')
+
+	includes = [
+		'.',
+		'../common',
+		'../engine',
+		'../pm_shared',
+		'../game_shared',
+		'../public',
+		'../dlls'
+	]
+	defines = []
+
+	if bld.env.DEST_OS not in ['android', 'dos']:
+		install_path = os.path.join(bld.env.GAMEDIR, bld.env.SERVER_INSTALL_DIR)
+	else:
+		install_path = bld.env.PREFIX
+
+	bld.shlib(
+		source   = source,
+		target   = 'menu' + bld.env.POSTFIX,
+		name     = 'menu',
+		features = 'c cxx',
+		includes = includes,
+		defines  = defines,
+		install_path = install_path,
+		subsystem = bld.env.MSVC_SUBSYSTEM,
+		idx = bld.get_taskgen_count()
+	)
+
