@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "Menu.h"
+#include "menu.h"
 
 enum m_state_e 
 {
@@ -2836,10 +2836,12 @@ void M_LanConfig_Key (int key)
 	}
 
 	if (StartingGame && lanConfig_cursor == 2)
+	{
 		if (key == K_UPARROW)
 			lanConfig_cursor = 1;
 		else
 			lanConfig_cursor = 0;
+	}
 
 	l =  atoi(lanConfig_portname);
 	if (l > 65535)
