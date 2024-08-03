@@ -30,8 +30,7 @@ def options(opt):
 	grp.add_option('--disable-werror', action = 'store_true', dest = 'DISABLE_WERROR', default = False,
 		help = 'disable compilation abort on warning')
 
-	opt.add_subproject('dlls')
-	opt.add_subproject('cl_dll')
+	opt.add_subproject('dlls cl_dll game_shared mainui')
 
 def configure(conf):
 	conf.load('fwgslib reconfigure compiler_optimizations')
@@ -104,6 +103,7 @@ def configure(conf):
 		opt_flags = [
 			# '-Wall', '-Wextra', '-Wpedantic',
 			'-fdiagnostics-color=always',
+			'-Wno-write-strings',
 
 			# stable diagnostics, forced to error, sorted
 			'-Werror=bool-compare',
@@ -231,8 +231,7 @@ def configure(conf):
 			conf.env.cxxshlib_PATTERN = conf.env.cxxshlib_PATTERN[3:]
 
 	conf.load('library_naming')
-	conf.add_subproject('dlls')
-	conf.add_subproject('cl_dll')
+	conf.add_subproject('dlls cl_dll game_shared mainui')
 
 def build(bld):
 	# don't clean QtCreator files and reconfigure saved options
@@ -240,5 +239,4 @@ def build(bld):
 		excl='*.user configuration.py .lock* *conf_check_*/** config.log %s/*' % Build.CACHE_DIR,
 		quiet=True, generator=True)
 
-	bld.add_subproject('dlls')
-	bld.add_subproject('cl_dll')
+	bld.add_subproject('dlls cl_dll game_shared mainui')
