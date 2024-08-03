@@ -13,6 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
+#include <string.h>
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
@@ -114,6 +115,9 @@ callbacks
 
 ====================
 */
+#ifndef _WIN32
+#define _stdcall
+#endif
 
 static int	(_stdcall *qfmod_geterror)();
 static float	(_stdcall *qfmod_getversion)();

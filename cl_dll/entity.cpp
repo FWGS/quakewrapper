@@ -23,8 +23,6 @@
 #include "r_studioint.h"
 #include "com_model.h"
 
-#define DLLEXPORT __declspec( dllexport )
-
 void VectorAngles( const float *forward, float *angles );
 
 extern vec3_t v_origin;

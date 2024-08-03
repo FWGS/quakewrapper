@@ -29,16 +29,15 @@ extern "C"
 }
 
 #include <string.h>
+#ifdef _WIN32
 #include <windows.h>
-
-#define DLLEXPORT __declspec( dllexport )
+#endif
 
 
 cl_enginefunc_t gEngfuncs;
 render_api_t gRenderfuncs;
 CHud gHUD;
 int g_iXashEngine = FALSE;
-BOOL g_fRenderInitialized = FALSE;
 void InitInput (void);
 void EV_HookEvents( void );
 void IN_Commands( void );
@@ -71,6 +70,7 @@ void	DLLEXPORT Demo_ReadBuffer( int size, unsigned char *buffer );
 void	DLLEXPORT HUD_DrawNormalTriangles( void );
 void	DLLEXPORT HUD_DrawTransparentTriangles( void );
 int	DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
+void DLLEXPORT HUD_MobilityInterface( void *gpMobileEngfuncs );
 }
 
 /*
@@ -82,27 +82,14 @@ Vgui stub
 */
 int *HUD_GetRect( void )
 {
-	RECT wrect;
 	static int extent[4];
 
-	if( GetWindowRect( GetActiveWindow(), &wrect ))
-          {
-		if( !wrect.left )
-		{
-			extent[0] = wrect.left;	//+4
-			extent[1] = wrect.top;	//+30
-			extent[2] = wrect.right;	//-4
-			extent[3] = wrect.bottom;	//-4
-		}
-		else
-		{
-			extent[0] = wrect.left + 4;	//+4
-			extent[1] = wrect.top + 30;	//+30
-			extent[2] = wrect.right - 4;	//-4
-			extent[3] = wrect.bottom - 4;	//-4
-		}
-	}
-	return extent;	
+	extent[0] = gEngfuncs.GetWindowCenterX() - ScreenWidth / 2;
+	extent[1] = gEngfuncs.GetWindowCenterY() - ScreenHeight / 2;
+	extent[2] = gEngfuncs.GetWindowCenterX() + ScreenWidth / 2;
+	extent[3] = gEngfuncs.GetWindowCenterY() + ScreenHeight / 2;
+
+	return extent;
 }
 
 /*
@@ -380,7 +367,17 @@ int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, re
 	// fill engine callbacks
 	memcpy( callback, &gRenderInterface, iImportSize );
 
-	g_fRenderInitialized = TRUE;
-
 	return TRUE;
+}
+
+static bool g_iXashFWGSEngine = false;
+
+void DLLEXPORT HUD_MobilityInterface( void *gpMobileEngfuncs )
+{
+	g_iXashFWGSEngine = true;
+}
+
+bool IsXashFWGS()
+{
+	return g_iXashFWGSEngine;
 }
