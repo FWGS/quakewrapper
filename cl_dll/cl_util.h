@@ -17,7 +17,11 @@
 //
 
 #include "cvardef.h"
+#ifdef _WIN32
 #include <windows.h>
+#else // _WIN32
+#include <dlfcn.h>
+#endif
 
 #ifndef TRUE
 #define TRUE 1
@@ -184,7 +188,11 @@ void	AngleQuaternion( float *angles, vec4_t quaternion );
 
 struct mleaf_s *Mod_PointInLeaf( Vector p, struct mnode_s *node );
 
+#ifdef _WIN32
 typedef HMODULE dllhandle_t;
+#else
+typedef void *dllhandle_t;
+#endif
 
 typedef struct dllfunc_s
 {

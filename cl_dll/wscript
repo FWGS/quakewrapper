@@ -11,11 +11,16 @@ def options(opt):
 	grp.add_option('--disable-goldsrc-support', action = 'store_false', dest = 'GOLDSOURCE_SUPPORT',
 		default=True, help = 'disable GoldSource compatibility')
 
+	grp.add_option('--enable-fmod', action = 'store_true', dest = 'FMOD',
+		default = False, help = 'enable using fmod for music')
+
 def configure(conf):
 	conf.env.GOLDSOURCE_SUPPORT = conf.options.GOLDSOURCE_SUPPORT
+	if conf.env.DEST_OS != 'win32':
+		conf.check_cc(lib='dl')
 
 def build(bld):
-	libs = []
+	libs = ['DL']
 	defines = ['CLIENT_DLL']
 	includes = ['.',
 		'../dlls',
@@ -23,6 +28,7 @@ def build(bld):
 		'../engine',
 		'../pm_shared',
 		'../public',
+		'../game_shared',
 		'../utils/fake_vgui/include']
 	source = bld.path.ant_glob('**/*.cpp')
 	source += bld.path.parent.ant_glob('pm_shared/*.c')
