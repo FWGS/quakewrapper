@@ -14,8 +14,7 @@ GNU General Public License for more details.
 */
 
 #include "menu.h"
-
-#define EXPORT __declspec(dllexport)
+#include "../dlls/exportdef.h"
 
 ui_enginefuncs_t engfuncs;
 ui_globalvars_t	*gpGlobals;
