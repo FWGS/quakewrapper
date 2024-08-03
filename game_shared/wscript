@@ -1,0 +1,23 @@
+#! /usr/bin/env python
+# encoding: utf-8
+# mittorn, 2018
+
+from waflib import Logs, Configure
+import os
+
+top = '.'
+
+def options(opt):
+	# stub
+	return
+
+def configure(conf):
+	# stub
+	return
+
+def build(bld):
+	bld.stlib(source = bld.path.ant_glob('*.cpp'),
+		target   = 'game_shared',
+		features = 'cxx',
+		subsystem = bld.env.MSVC_SUBSYSTEM,
+		export_includes = '.')
