@@ -1597,11 +1597,11 @@ void PF_changepitch( void )
 	ent = G_EDICT( OFS_PARM0 );
 	pr_entvars_t *pev = (pr_entvars_t *)GET_PRIVATE( ent );
 
-	if( val = GETEDICTFIELDVALUE( ent, pr.eval_idealpitch ))
+	if(( val = GETEDICTFIELDVALUE( ent, pr.eval_idealpitch )))
 		ideal_pitch = val->value;
 	else PR_RunError( "PF_changepitch: .float idealpitch and .float pitch_speed must be defined to use changepitch" );
 
-	if( val = GETEDICTFIELDVALUE( ent, pr.eval_pitch_speed ))
+	if(( val = GETEDICTFIELDVALUE( ent, pr.eval_pitch_speed )))
 		pitch_speed = val->value;
 	else PR_RunError( "PF_changepitch: .float idealpitch and .float pitch_speed must be defined to use changepitch" );
 

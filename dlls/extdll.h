@@ -58,11 +58,7 @@ typedef int BOOL;
 #endif
 #endif //_WIN32
 
-#ifdef _WIN32
-#define EXPORT	_declspec( dllexport )
-#else
-#define EXPORT	/* */
-#endif
+#include "exportdef.h"
 
 // Misc C-runtime library headers
 #include "stdio.h"

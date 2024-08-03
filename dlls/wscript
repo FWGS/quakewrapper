@@ -28,8 +28,7 @@ def build(bld):
 		'../common',
 		'../engine',
 		'../pm_shared',
-		'../game_shared',
-		'../public'
+		'../public',
 	]
 
 	if bld.env.DEST_OS not in ['android', 'dos']:
@@ -44,6 +43,7 @@ def build(bld):
 		features = 'c cxx',
 		includes = includes,
 		defines  = defines,
+		use = 'game_shared',
 		install_path = install_path,
 		subsystem = bld.env.MSVC_SUBSYSTEM,
 		idx = bld.get_taskgen_count()
