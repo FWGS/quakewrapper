@@ -1,0 +1,21 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import os
+
+def options(opt):
+	pass
+
+def configure(conf):
+	conf.load('zip')
+
+def build(bld):
+	srcdir = bld.path.find_dir('extras.pk3dir')
+
+	bld(features='zip',
+		name = 'extras.pk3',
+		files = srcdir.ant_glob('**/*'),
+		relative_to = srcdir,
+		install_path = bld.env.GAMEDIR)
+
+	bld.install_files(bld.env.GAMEDIR, 'delta.lst')
