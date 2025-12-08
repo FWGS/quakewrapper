@@ -215,10 +215,14 @@ bool IsStudioModel( const char *path )
 		return false;
 
 	fread( buffer, sizeof( buffer ), 1, fp );
-	fclose( fp );
 
 	if( ftell( fp ) < sizeof( 244 ))
+	{
+		fclose( fp );
 		return false;
+	}
+
+	fclose( fp );
 
 	// skip invalid signature
 	if( Q_strncmp((const char *)buffer, "IDST", 4 ))
@@ -243,10 +247,14 @@ static bool ValidateModel( const char *path )
 		return false;
 
 	fread( buffer, sizeof( buffer ), 1, fp );
-	fclose( fp );
 
 	if( ftell( fp ) < sizeof( daliashdr_t ))
+	{
+		fclose( fp );
 		return false;
+	}
+
+	fclose( fp );
 
 	// skip invalid signature
 	if( Q_strncmp((const char *)buffer, "IDPO", 4 ))
