@@ -17,6 +17,7 @@ GNU General Public License for more details.
 #define COM_MODEL_H
 
 #include "bspfile.h"	// we need some declarations from it
+#include "build.h"
 
 /*
 ==============================================================================
@@ -109,10 +110,32 @@ typedef struct mnode_s
 
 // node specific
 	mplane_t		*plane;
-	struct mnode_s	*children[2];	
 
-	unsigned short	firstsurface;
-	unsigned short	numsurfaces;
+#if !XASH_64BIT
+	union
+	{
+		struct mnode_s *children_[2];
+		struct
+		{
+			// the ordering is important
+			int child_0_leaf    : 1;
+			int child_0_off     : 23;
+			int firstsurface_1  : 8;
+			int child_1_leaf    : 1;
+			int child_1_off     : 23;
+			int numsurfaces_1   : 8;
+		};
+	};
+	unsigned short	firstsurface_0;
+	unsigned short	numsurfaces_0;
+#else
+	// in 64-bit ABI this struct has 4 more bytes of padding, let's use it!
+	struct mnode_s	*children_[2];
+	unsigned short	firstsurface_0;
+	unsigned short	numsurfaces_0;
+	unsigned short	firstsurface_1;
+	unsigned short	numsurfaces_1;
+#endif
 } mnode_t;
 
 typedef struct msurface_s	msurface_t;
@@ -275,6 +298,59 @@ typedef struct model_s
 //
 	cache_user_t	cache;		// only access through Mod_Extradata
 } model_t;
+
+// model flags (stored in model_t->flags)
+#define MODEL_QBSP2	(1U << 28)	// uses 32-bit surface indices
+
+// BSP2 node access helpers
+static inline mnode_t *node_child( const mnode_t *n, int side, const model_t *mod )
+{
+#if !XASH_64BIT
+	if( mod->flags & MODEL_QBSP2 )
+	{
+		if( side == 0 )
+		{
+			if( n->child_0_leaf )
+				return (mnode_t *)(mod->leafs + n->child_0_off);
+			else
+				return (mnode_t *)(mod->nodes + n->child_0_off);
+		}
+		else
+		{
+			if( n->child_1_leaf )
+				return (mnode_t *)(mod->leafs + n->child_1_off);
+			else
+				return (mnode_t *)(mod->nodes + n->child_1_off);
+		}
+	}
+
+	return n->children_[side];
+#else
+	return n->children_[side];
+#endif
+}
+
+static inline void node_children( mnode_t *children[2], const mnode_t *n, const model_t *mod )
+{
+	children[0] = node_child( n, 0, mod );
+	children[1] = node_child( n, 1, mod );
+}
+
+static inline int node_firstsurface( const mnode_t *n, const model_t *mod )
+{
+	if( mod->flags & MODEL_QBSP2 )
+		return n->firstsurface_0 + ( n->firstsurface_1 << 16 );
+	else
+		return n->firstsurface_0;
+}
+
+static inline int node_numsurfaces( const mnode_t *n, const model_t *mod )
+{
+	if( mod->flags & MODEL_QBSP2 )
+		return n->numsurfaces_0 + ( n->numsurfaces_1 << 16 );
+	else
+		return n->numsurfaces_0;
+}
 
 typedef vec_t		vec4_t[4];
 
