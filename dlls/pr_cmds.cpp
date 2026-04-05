@@ -1969,7 +1969,11 @@ void PF_checkextension( void )
 	G_FLOAT( OFS_RETURN ) = PR_checkextension( G_STRING( OFS_PARM0 ));
 }
 
-static builtin_t prog_builtin[] =
+static void PF_stub( void )
+{
+}
+
+static builtin_t prog_builtin[300] =
 {
 NULL,			// #0 NULL function (not callable)
 PF_makevectors,		// #1 void(vector ang) makevectors
@@ -2082,6 +2086,9 @@ install progs builtins
 */
 void PR_InstallBuiltins( void )
 {
+	prog_builtin[232] = PF_stub; // clientstat
+	prog_builtin[233] = PF_stub; // globalstat
+
 	pr.numbuiltins = ARRAYSIZE( prog_builtin );
 	pr.builtins = prog_builtin;
 }
