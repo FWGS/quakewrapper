@@ -202,6 +202,8 @@ void LinkUserMessages( void )
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
 {
+	AllocStringPool();
+
 	// Register cvars here:
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
@@ -279,4 +281,5 @@ void GameResetFog( void )
 void GameDLLShutdown( void )
 {
 	PR_UnloadProgs();
+	FreeStringPool();
 }

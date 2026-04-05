@@ -20,6 +20,7 @@
 
 */
 
+#include <cstdint>
 #include "extdll.h"
 #include "util.h"
 #include "client.h"
@@ -175,7 +176,151 @@ void *DispatchHullForBsp( edict_t *ent, const float *fmins, const float *fmaxs, 
 
 	return hull;
 }
-	
+
+char *g_pDynamicStringBase = NULL;
+static int g_DynamicStringBaseLength = 0;
+
+#if 0
+#define STRING_ALERT( x, ... ) ALERT( at_console, x, __VA_ARGS__ )
+#else
+#define STRING_ALERT( x, ... )
+#endif
+
+/*
+============
+SV_ProcessString
+
+Process newly allocated string
+pass NULL pointer to dst to get required length incl. null terminator
+============
+*/
+static uint SV_ProcessString( char *dst, const char *src )
+{
+	const char *p;
+	uint i = 0;
+
+	p = src;
+
+	while( *p )
+	{
+		if( *p == '\\' )
+		{
+			char replace = 0;
+
+			switch( p[1] )
+			{
+			case 'n': replace = '\n'; break;
+			// GoldSrc doesn't replace these symbols
+			// but old hack in pfnWriteString did
+			case 'r': replace = '\r'; break;
+			case 't': replace = '\t'; break;
+			}
+
+			if( replace )
+			{
+				if( dst )
+					dst[i] = replace;
+				i++;
+				p += 2;
+				continue;
+			}
+		}
+
+		if( dst )
+			dst[i] = *p;
+		i++;
+		p++;
+	}
+
+	// null terminator
+	if( dst )
+		dst[i] = '\0';
+	i++;
+
+	return i;
+}
+
+string_t ALLOC_STRING( const char *str )
+{
+	size_t len = SV_ProcessString( NULL, str );
+	char *processed_string = (char *)malloc( len );
+	char *dupe_string;
+
+	SV_ProcessString( processed_string, str );
+
+	for( dupe_string = g_pDynamicStringBase; dupe_string < g_pDynamicStringBase + g_DynamicStringBaseLength; dupe_string += strlen( dupe_string ) + 1 )
+	{
+		if( !Q_strcmp( dupe_string, processed_string ))
+		{
+			string_t i = -( dupe_string - g_pDynamicStringBase ) - 1;
+			STRING_ALERT( "%s: %s -> %d\n", __func__, str, i );
+			return i;
+		}
+	}
+
+	// dupe not found
+	int offset = g_DynamicStringBaseLength;
+	char *p = (char *)realloc( g_pDynamicStringBase, offset + len );
+
+	if( !p )
+	{
+		HOST_ERROR( "%s: realloc returned null\n", __func__ );
+		return -1;
+	}
+
+	memcpy( p + offset, processed_string, len );
+
+	g_pDynamicStringBase = p;
+	g_DynamicStringBaseLength += len;
+
+	string_t i = -( offset ) - 1;
+	STRING_ALERT( "%s: %s -> %d\n", __func__, str, i );
+	return i;
+}
+
+void FreeStringPool()
+{
+	free( g_pDynamicStringBase );
+
+	g_pDynamicStringBase = NULL;
+	g_DynamicStringBaseLength = 0;
+}
+
+void AllocStringPool()
+{
+	FreeStringPool();
+}
+
+string_t MAKE_STRING( const char *str )
+{
+	ptrdiff_t ptrdiff = str - STRING( 0 );
+
+	// located after static string base
+	if( ptrdiff >= 0 && ptrdiff < INT32_MAX )
+	{
+		STRING_ALERT( "%s: %s -> %d\n", __func__, str, ptrdiff );
+		return (string_t)ptrdiff;
+	}
+
+	// located before static string base -> allocate
+	STRING_ALERT( "%s: allocating %s\n", __func__, str );
+	return ALLOC_STRING( str );
+}
+
+const char *STRING( string_t i )
+{
+	if( i < 0 )
+	{
+		const char *s = g_pDynamicStringBase + -(i + 1);
+		STRING_ALERT( "%s: %d -> %s\n", __func__, i, s );
+		return s;
+	}
+
+	const char *s = gpGlobals->pStringBase + i;
+	STRING_ALERT( "%s: %d -> %s\n", __func__, i, s );
+	return s;
+}
+
 static physics_interface_t gPhysicsInterface = 
 {
 	SV_PHYSICS_INTERFACE_VERSION,
@@ -194,9 +339,9 @@ static physics_interface_t gPhysicsInterface =
 	EndFrame,
 	NULL,
 	DispatchCreateEntitiesInRestoreList,
-	NULL,
-	NULL,
-	NULL,
+	ALLOC_STRING,
+	MAKE_STRING,
+	STRING,
 	NULL,
 	PM_PlayerTouch,
 	NULL,

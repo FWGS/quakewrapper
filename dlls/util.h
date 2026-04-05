@@ -15,6 +15,7 @@
 //
 // Misc utility code
 //
+#include <cstddef>
 #ifndef ENGINECALLBACK_H
 #include "enginecallback.h"
 #endif
@@ -26,10 +27,6 @@
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent );  // implementation later in this file
 
 extern globalvars_t			*gpGlobals;
-
-// Use this instead of ALLOC_STRING on constant strings
-#define STRING(offset)		(const char *)(gpGlobals->pStringBase + (int)offset)
-#define MAKE_STRING(str)	((int)str - (int)STRING(0))
 
 // Testing the three types of "entity" for nullity
 #define eoNullEntity 0
@@ -47,6 +44,12 @@ typedef int BOOL;
 #define M_PI			3.14159265358979323846
 
 class CBaseEntity;
+
+void FreeStringPool();
+void AllocStringPool();
+string_t ALLOC_STRING( const char *str );
+string_t MAKE_STRING( const char *str );
+const char *STRING( string_t i );
 
 //
 // Conversion among the three types of "entity", including identity-conversions.
@@ -155,4 +158,3 @@ extern void UTIL_LogPrintf( char *fmt, ... );
 void CRC_Init( word *crcvalue );
 void CRC_ProcessByte( word *crcvalue, byte data );
 word CRC_Value( word crcvalue );
-	 
