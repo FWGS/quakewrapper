@@ -380,7 +380,7 @@ mstudioanim_t *CStudioModelRenderer::StudioGetAnim( model_t *m_pSubModel, mstudi
 
 	if (pseqdesc->seqgroup == 0)
 	{
-		return (mstudioanim_t *)((byte *)m_pStudioHeader + pseqgroup->data + pseqdesc->animindex);
+		return (mstudioanim_t *)((byte *)m_pStudioHeader + pseqdesc->animindex);
 	}
 
 	paSequences = (cache_user_t *)m_pSubModel->submodels;
@@ -581,9 +581,9 @@ void CStudioModelRenderer::StudioSetUpTransform (int trivial_accept)
 		if( pScale[1] == 0.0f ) pScale[1] = 1.0f;
 		if( pScale[2] == 0.0f ) pScale[2] = 1.0f;
 
-		vScale[0] = fabs( pScale[0] ) + (( m_clTime - m_pCurrentEntity->curstate.animtime) * 10.0) * pScale[0];
-		vScale[1] = fabs( pScale[1] ) + (( m_clTime - m_pCurrentEntity->curstate.animtime) * 10.0) * pScale[1];
-		vScale[2] = fabs( pScale[2] ) + (( m_clTime - m_pCurrentEntity->curstate.animtime) * 10.0) * pScale[2];
+		vScale[0] = Q_fabs( pScale[0] ) + (( m_clTime - m_pCurrentEntity->curstate.animtime) * 10.0) * pScale[0];
+		vScale[1] = Q_fabs( pScale[1] ) + (( m_clTime - m_pCurrentEntity->curstate.animtime) * 10.0) * pScale[1];
+		vScale[2] = Q_fabs( pScale[2] ) + (( m_clTime - m_pCurrentEntity->curstate.animtime) * 10.0) * pScale[2];
 
 		for( i = 0; i < 3; i++)
 			vScale[i] = bound( 0.5, vScale[i], 2 );

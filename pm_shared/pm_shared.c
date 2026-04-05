@@ -57,8 +57,8 @@ playermove_t *pmove = NULL;
 
 // double to float warning
 #pragma warning(disable : 4244)
-#define max(a, b)  (((a) > (b)) ? (a) : (b))
-#define min(a, b)  (((a) < (b)) ? (a) : (b))
+#define Q_max(a, b)  (((a) > (b)) ? (a) : (b))
+#define Q_min(a, b)  (((a) < (b)) ? (a) : (b))
 // up / down
 #define	PITCH	0
 // left / right
@@ -1418,7 +1418,7 @@ void PM_DropPunchAngle ( vec3_t punchangle )
 	
 	len = VectorNormalize ( punchangle );
 	len -= (10.0 + len * 0.5) * pmove->frametime;
-	len = max( len, 0.0 );
+	len = Q_max( len, 0.0 );
 	VectorScale ( punchangle, len, punchangle);
 }
 

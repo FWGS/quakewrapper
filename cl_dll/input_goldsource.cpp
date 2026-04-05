@@ -1385,7 +1385,7 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 				// y=ax^b; where a = 300 and b = 1.3
 				// also x values are in increments of 800 (so this is factored out)
 				// then bounds check result to level out excessively high spin rates
-				fTemp = 300.0 * pow(fabs(fAxisValue) / 800.0, 1.3);
+				fTemp = 300.0 * pow(Q_fabs(fAxisValue) / 800.0, 1.3);
 				if (fTemp > 14000.0)
 					fTemp = 14000.0;
 				// restore direction information
@@ -1402,7 +1402,7 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 			if ((joy_advanced->value == 0.0) && (in_jlook.state & 1))
 			{
 				// user wants forward control to become look control
-				if (fabs(fAxisValue) > joy_pitchthreshold->value)
+				if (Q_fabs(fAxisValue) > joy_pitchthreshold->value)
 				{
 					// if mouse invert is on, invert the joystick pitch value
 					// only absolute control support here (joy_advanced is 0)
@@ -1431,7 +1431,7 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 			else
 			{
 				// user wants forward control to be forward control
-				if (fabs(fAxisValue) > joy_forwardthreshold->value)
+				if (Q_fabs(fAxisValue) > joy_forwardthreshold->value)
 				{
 					cmd->forwardmove += (fAxisValue * joy_forwardsensitivity->value) * speed * cl_forwardspeed->value;
 				}
@@ -1439,7 +1439,7 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 			break;
 
 		case AxisSide:
-			if (fabs(fAxisValue) > joy_sidethreshold->value)
+			if (Q_fabs(fAxisValue) > joy_sidethreshold->value)
 			{
 				cmd->sidemove += (fAxisValue * joy_sidesensitivity->value) * speed * cl_sidespeed->value;
 			}
@@ -1449,7 +1449,7 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 			if ((in_strafe.state & 1) || (lookstrafe->value && (in_jlook.state & 1)))
 			{
 				// user wants turn control to become side control
-				if (fabs(fAxisValue) > joy_sidethreshold->value)
+				if (Q_fabs(fAxisValue) > joy_sidethreshold->value)
 				{
 					cmd->sidemove -= (fAxisValue * joy_sidesensitivity->value) * speed * cl_sidespeed->value;
 				}
@@ -1457,7 +1457,7 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 			else
 			{
 				// user wants turn control to be turn control
-				if (fabs(fAxisValue) > joy_yawthreshold->value)
+				if (Q_fabs(fAxisValue) > joy_yawthreshold->value)
 				{
 					if(dwControlMap[i] == JOY_ABSOLUTE_AXIS)
 					{
@@ -1475,7 +1475,7 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 		case AxisLook:
 			if (in_jlook.state & 1)
 			{
-				if (fabs(fAxisValue) > joy_pitchthreshold->value)
+				if (Q_fabs(fAxisValue) > joy_pitchthreshold->value)
 				{
 					// pitch movement detected and pitch movement desired by user
 					if(dwControlMap[i] == JOY_ABSOLUTE_AXIS)

@@ -136,9 +136,9 @@ inline void CenterPrint( const char *string )
 inline void PlaySound( char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
 inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( iSound, vol ); }
 
-#define max(a, b)  (((a) > (b)) ? (a) : (b))
-#define min(a, b)  (((a) < (b)) ? (a) : (b))
-#define fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
+#define Q_max(a, b)  (((a) > (b)) ? (a) : (b))
+#define Q_min(a, b)  (((a) < (b)) ? (a) : (b))
+#define Q_fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
 
 #define DotProduct(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
 #define VectorSubtract(a,b,c) {(c)[0]=(a)[0]-(b)[0];(c)[1]=(a)[1]-(b)[1];(c)[2]=(a)[2]-(b)[2];}
@@ -158,7 +158,7 @@ extern vec3_t vec3_origin;
 // disable 'truncation from 'const double' to 'float' warning message
 #pragma warning( disable: 4305 )
 
-inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)\
+inline void UnpackRGB(int &r, int &g, int &b, unsigned int ulRGB)\
 {\
 	r = (ulRGB & 0xFF0000) >>16;\
 	g = (ulRGB & 0xFF00) >> 8;\
@@ -171,7 +171,7 @@ int UTIL_IntegerToString( int num, char *buf );
 void CL_AllocBeam( const char *model, int ent, Vector start, Vector end );
 void CL_ClearBeams( void );
 
-#define FDotProduct( a, b ) (fabs((a[0])*(b[0])) + fabs((a[1])*(b[1])) + fabs((a[2])*(b[2])))
+#define FDotProduct( a, b ) (Q_fabs((a[0])*(b[0])) + Q_fabs((a[1])*(b[1])) + Q_fabs((a[2])*(b[2])))
 #define anglemod( a ) ((360.0f/65536) * ((int)(a*(65536/360.0f)) & 65535))
 
 typedef vec_t	vec4_t[4];

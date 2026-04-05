@@ -428,7 +428,7 @@ mleaf_t *Mod_PointInLeaf( Vector p, model_t *mod )
 	{
 		if( node->contents < 0 )
 			return (mleaf_t *)node;
-		node = node_child( node, PlaneDiff( p, node->plane ) < 0, mod );
+		node = node_child( node, PlaneDiff( p, node->plane ) <= 0, mod );
 	}
 
 	// never reached
