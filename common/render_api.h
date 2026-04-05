@@ -183,9 +183,9 @@ typedef struct render_api_s
 
 	// AVIkit support
 	void		*(*AVI_LoadVideo)( const char *filename );
-	int		(*AVI_GetVideoInfo)( void *Avi, long *xres, long *yres, float *duration );
-	long		(*AVI_GetVideoFrameNumber)( void *Avi, float time );
-	byte		*(*AVI_GetVideoFrame)( void *Avi, long frame );
+	int		(*AVI_GetVideoInfo)( void *Avi, int *xres, int *yres, float *duration );
+	int		(*AVI_GetVideoFrameNumber)( void *Avi, float time );
+	byte		*(*AVI_GetVideoFrame)( void *Avi, int frame );
 	void		(*AVI_UploadRawFrame)( int texture, int cols, int rows, int width, int height, const byte *data );
 	void		(*AVI_FreeVideo)( void *Avi );
 	int		(*AVI_IsActive)( void *Avi );
@@ -224,14 +224,14 @@ typedef struct render_api_s
 
  	// engine utils (not related with render API but placed here)
 	char		**(*pfnGetFilesList)( const char *pattern, int *numFiles, int gamedironly );
-	unsigned long	(*pfnFileBufferCRC32)( const void *buffer, const int length );
+	unsigned int	(*pfnFileBufferCRC32)( const void *buffer, const int length );
 	int		(*COM_CompareFileTime)( const char *filename1, const char *filename2, int *iCompare );
 	void		(*Host_Error)( const char *error, ... ); // cause Host Error
 	void*		( *pfnGetModel )( int modelindex );
 	float		(*pfnTime)( void );				// Sys_DoubleTime
 	void		(*Cvar_Set)( char *name, char *value );
 	void		(*S_FadeMusicVolume)( float fadePercent );	// fade background track (0-100 percents)
-	void		(*SetRandomSeed)( long lSeed );		// set custom seed for RANDOM_FLOAT\RANDOM_LONG for predictable random
+	void		(*SetRandomSeed)( int lSeed );		// set custom seed for RANDOM_FLOAT\RANDOM_LONG for predictable random
 	// ONLY ADD NEW FUNCTIONS TO THE END OF THIS STRUCT.  INTERFACE VERSION IS FROZEN AT 37
 } render_api_t;
 
