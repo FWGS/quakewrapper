@@ -1,0 +1,9 @@
+basedir "qwrap"
+title "Quake Wrapper"
+startmap "start"
+
+dllpath "bin"
+gamedll "bin/progs.dll"
+gamedll_linux "bin/progs.so"
+gamedll_osx "bin/progs.dylib"
+
