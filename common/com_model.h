@@ -16,6 +16,11 @@ GNU General Public License for more details.
 #ifndef COM_MODEL_H
 #define COM_MODEL_H
 
+#ifdef __cplusplus
+#include <cstdint>
+#else
+#include <stdint.h>
+#endif
 #include "bspfile.h"	// we need some declarations from it
 #include "build.h"
 
@@ -238,7 +243,7 @@ typedef struct model_s
 	// shared modelinfo
 	modtype_t		type;		// model type
 	int		numframes;	// sprite's framecount
-	byte		*mempool;		// private mempool (was synctype)
+	uint32_t	mempool;		// private mempool (was synctype)
 	int		flags;		// hl compatibility
 
 //
