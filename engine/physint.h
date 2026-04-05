@@ -18,7 +18,13 @@ GNU General Public License for more details.
 
 #define SV_PHYSICS_INTERFACE_VERSION	6
 
-#define STRUCT_FROM_LINK( l, t, m )	((t *)((byte *)l - (int)&(((t *)0)->m)))
+#ifdef __GNUC__
+	#define offsetof( s, m )   __builtin_offsetof( s, m )
+#else
+	#define offsetof( s, m ) (size_t)&(((s *)0)->m )
+#endif
+
+#define STRUCT_FROM_LINK( l, t, m )	((t *)((byte *)l - offsetof(t, m)))
 #define EDICT_FROM_AREA( l )		STRUCT_FROM_LINK( l, edict_t, area )
 
 // values that can be returned with pfnServerState
@@ -48,6 +54,10 @@ GNU General Public License for more details.
 #define LUMP_SAVE_NO_DATA		7
 #define LUMP_SAVE_CORRUPTED		8
 
+#ifndef ALLOC_CHECK
+#define ALLOC_CHECK( x )
+#endif
+
 typedef struct areanode_s
 {
 	int		axis;		// -1 = leaf node
@@ -75,8 +85,8 @@ typedef struct server_physics_api_s
 	int		( *pfnDrawConsoleString )( int x, int y, char *string );
 	void		( *pfnDrawSetTextColor )( float r, float g, float b );
 	void		( *pfnDrawConsoleStringLen )( const char *string, int *length, int *height );
-	void		( *Con_NPrintf )( int pos, char *fmt, ... );
-	void		( *Con_NXPrintf )( struct con_nprint_s *info, char *fmt, ... );
+	void		( *Con_NPrintf )( int pos, const char *fmt, ... );
+	void		( *Con_NXPrintf )( struct con_nprint_s *info, const char *fmt, ... );
 	const char	*( *pfnGetLightStyle )( int style ); // read custom appreance for selected lightstyle
 	void		( *pfnUpdateFogSettings )( unsigned int packed_fog );
 	char		**(*pfnGetFilesList)( const char *pattern, int *numFiles, int gamedironly );
@@ -84,7 +94,7 @@ typedef struct server_physics_api_s
 	const byte	*(*pfnGetTextureData)( unsigned int texnum );
 
 	// static allocations
-	void		*(*pfnMemAlloc)( size_t cb, const char *filename, const int fileline );
+	void		*(*pfnMemAlloc)( size_t cb, const char *filename, const int fileline ) ALLOC_CHECK( 1 );
 	void		(*pfnMemFree)( void *mem, const char *filename, const int fileline );
 
 	// trace & contents
@@ -94,7 +104,7 @@ typedef struct server_physics_api_s
 	int		(*pfnBoxInPVS)( const float *org, const float *boxmins, const float *boxmaxs );
 
 	// message handler (missed function to write raw bytes)
-	void		(*pfnWriteBytes)( byte *bytes, int count );
+	void		(*pfnWriteBytes)( const byte *bytes, int count );
 
 	// BSP lump management
 	int		(*pfnCheckLump)( const char *filename, const int lump, int *lumpsize );
@@ -102,10 +112,13 @@ typedef struct server_physics_api_s
 	int		(*pfnSaveLump)( const char *filename, const int lump, void *lumpdata, int lumpsize );
 
 	// FS tools
-	int		(*pfnSaveFile)( const char *filename, const void *data, long len );
+	int		(*pfnSaveFile)( const char *filename, const void *data, int len );
 	const byte	*(*pfnLoadImagePixels)( const char *filename, int *width, int *height );
 
-	const char*	(*pfnGetModelName)( int modelindex );
+	const char *(*pfnGetModelName)( int modelindex );
+
+	// FWGS extension
+	void       *(*pfnGetNativeObject)( const char *object );
 } server_physics_api_t;
 
 // physic callbacks
@@ -140,7 +153,7 @@ typedef struct physics_interface_s
 	// called at end the frame of SV_Physics call
 	void		( *SV_EndFrame )( void );
 	// obsolete
-	void		(*pfnReserved)( void );
+	void		(*pfnPrepWorldFrame)( void );
 	// called through save\restore process
 	void		(*pfnCreateEntitiesInRestoreList)( SAVERESTOREDATA *pSaveData, int levelMask, qboolean create_world );
 	// allocate custom string (e.g. using user implementation of stringtable, not engine strings)
