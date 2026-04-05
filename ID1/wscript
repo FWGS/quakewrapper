@@ -17,5 +17,3 @@ def build(bld):
 		files = srcdir.ant_glob('**/*'),
 		relative_to = srcdir,
 		install_path = bld.env.GAMEDIR)
-
-	bld.install_files(bld.env.GAMEDIR, 'delta.lst')
