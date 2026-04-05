@@ -47,6 +47,7 @@ cvar_t	noexit = { "noexit", "0", FCVAR_SERVER };
 cvar_t	samelevel = { "samelevel", "0", FCVAR_SERVER };
 cvar_t	pr_checkextension = { "pr_checkextension", "1" };			// a part of extension system
 cvar_t	nospr32 = { "nospr32", "0", FCVAR_ARCHIVE };
+static cvar_t campaign = { "campaign", "1" }; // quake re-release added
 
 // multiplayer server rules
 cvar_t	fragsleft	= {"mp_fragsleft","0", FCVAR_SERVER | FCVAR_UNLOGGED };	// Don't spam console/log files/users with this changing
@@ -261,6 +262,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&nehx18);
 	CVAR_REGISTER (&nehx19);
 	CVAR_REGISTER (&cutscene);
+	CVAR_REGISTER (&campaign);
 	LinkUserMessages ();
 
 	// ripped out from quake
