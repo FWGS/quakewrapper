@@ -207,7 +207,6 @@ void PR_Profile_f( void );
 //
 // pr_cmds.cpp
 //
-bool PR_ValidateArgs( const char *builtin, int num_argc );
 void PR_SetTraceGlobals( void );
 #define PR_ValidateString( str ) _PR_ValidateString( str, __FILE__, __LINE__ )
 void _PR_ValidateString( const char *s, const char *filename, const int fileline );

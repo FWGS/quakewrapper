@@ -49,20 +49,25 @@ PR_ValidateArgs
 check arguments count
 =================
 */
-bool PR_ValidateArgs( const char *builtin, int num_argc )
+static bool PR_ValidateArgs( const char *builtin, int min_argc, int max_argc )
 {
-	if( pr.argc < num_argc )
+	if( pr.argc < min_argc )
 	{
-		ALERT( at_warning, "%s called with too few parameters\n", builtin );
+		ALERT( at_warning, "%s called with too few parameters (expected %d, got %d)\n", builtin, min_argc, pr.argc );
 		return false;
 	}
-	else if( pr.argc > num_argc )
+	else if( pr.argc > max_argc )
 	{
-		ALERT( at_warning, "%s called with too many parameters\n", builtin );
+		ALERT( at_warning, "%s called with too many parameters (expected %d, got %d)\n", builtin, max_argc, pr.argc );
 		return false;
 	}
 
 	return true;
+}
+
+static bool PR_ValidateArgs( const char *builtin, int num_argc )
+{
+	return PR_ValidateArgs( builtin, num_argc, num_argc );
 }
 
 /*
@@ -789,12 +794,29 @@ void PF_localcmd( void )
 {
 	const char	*s;
 
-	if( !PR_ValidateArgs( "localcmd", 1 ))
+	if( !PR_ValidateArgs( "localcmd", 1, 8 ))
 		return;
 
-	if( !Q_strncmp( G_STRING( OFS_PARM0 ), "restart", 7 ))
-		s = "reload\n";
-	else s = G_STRING( OFS_PARM0 );
+	if( pr.argc == 1 )
+	{
+		if( !Q_strncmp( G_STRING( OFS_PARM0 ), "restart", 7 ))
+			s = "reload\n";
+		else
+			s = G_STRING( OFS_PARM0 );
+	}
+	else
+	{
+		static char concat[1024];
+
+		Q_strncpy( concat, G_STRING( OFS_PARM0 ), sizeof( concat ));
+		for( int i = 1; i < pr.argc; i++ )
+		{
+			Q_strncat( concat, " ", sizeof( concat ));
+			Q_strncat( concat, G_STRING( OFS_PARM0 + i * 3 ), sizeof( concat ));
+		}
+
+		s = concat;
+	}
 
 	SERVER_COMMAND( s );
 }
