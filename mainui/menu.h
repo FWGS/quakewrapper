@@ -91,19 +91,7 @@ void UI_FinalCredits( void );	// show credits + game end
 
 inline HIMAGE Draw_CachePic( const char *picname, int flags = 0 )
 {
-	return engfuncs.pfnPIC_Load( picname, NULL, 0, flags );
-}
-
-inline void Draw_TransPic( int x, int y, HIMAGE pic )
-{
-	engfuncs.pfnPIC_Set( pic, 255, 255, 255, 255 );
-	engfuncs.pfnPIC_DrawTrans( x, y, -1, -1, 0 );
-}
-
-inline void Draw_Pic( int x, int y, HIMAGE pic )
-{
-	engfuncs.pfnPIC_Set( pic, 255, 255, 255, 255 );
-	engfuncs.pfnPIC_Draw( x, y, -1, -1, NULL );
+	return engfuncs.pfnPIC_Load( picname, NULL, 0, flags | PIC_NEAREST );
 }
 
 inline void Draw_PicFull( HIMAGE pic )
@@ -145,5 +133,6 @@ extern char com_gamedir[64];
 extern int hipnotic, rogue, nehahra;
 extern qboolean localSearch;
 extern HIMAGE player_image;
+extern HIMAGE conchars_image;
 
 #endif // MENU_H

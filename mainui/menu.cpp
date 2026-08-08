@@ -240,6 +240,19 @@ char *va( const char *format, ... )
 	return s;
 }
 
+int	m_scale = 1;
+
+// map virtual 320x240 coordinates to real screen, scaled and centered
+static int M_ScaleX (int x)
+{
+	return x * m_scale + ((ScreenWidth - 320 * m_scale)>>1);
+}
+
+static int M_ScaleY (int y)
+{
+	return y * m_scale + ((ScreenHeight - 240 * m_scale)>>1);
+}
+
 /*
 ================
 M_DrawCharacter
@@ -249,9 +262,7 @@ Draws one solid graphics character
 */
 void M_DrawCharacter (int cx, int line, int num)
 {
-	char str[] = { (char)num, '\0' };
-	engfuncs.pfnDrawConsoleString( cx + ((ScreenWidth - 320)>>1), line + ((ScreenHeight - 240)>>1), str );
-	// Draw_Character ( cx + ((ScreenWidth - 320)>>1), line, num);
+	engfuncs.pfnDrawCharacter( M_ScaleX( cx ), M_ScaleY( line ), 8 * m_scale, 8 * m_scale, num, 0xFFFFFFFF, conchars_image );
 }
 
 void M_Print (int cx, int cy, const char *str)
@@ -276,12 +287,16 @@ void M_PrintWhite (int cx, int cy, const char *str)
 
 void M_DrawTransPic (int x, int y, HIMAGE pic)
 {
-	Draw_TransPic (x + ((ScreenWidth - 320)>>1), y + ((ScreenHeight - 240)>>1), pic);
+	int w = engfuncs.pfnPIC_Width( pic ) * m_scale;
+	int h = engfuncs.pfnPIC_Height( pic ) * m_scale;
+
+	engfuncs.pfnPIC_Set( pic, 255, 255, 255, 255 );
+	engfuncs.pfnPIC_DrawTrans( M_ScaleX( x ), M_ScaleY( y ), w, h, NULL );
 }
 
 void M_DrawPic (int x, int y, HIMAGE pic)
 {
-	Draw_TransPic (x + ((ScreenWidth - 320)>>1), y + ((ScreenHeight - 240)>>1), pic);
+	M_DrawTransPic (x, y, pic);
 }
 
 void M_DrawTextBox (int x, int y, int width, int lines)
@@ -3741,15 +3756,17 @@ void M_DrawTile()
 	HIMAGE hImage = Draw_CachePic("gfx/backtile.lmp");
 	int x = 0, y = 0;
 	int w, h;
-	w = Draw_PicWidth( hImage );
-	h = engfuncs.pfnPIC_Height( hImage );
-	
+	w = Draw_PicWidth( hImage ) * m_scale;
+	h = engfuncs.pfnPIC_Height( hImage ) * m_scale;
+
+	engfuncs.pfnPIC_Set( hImage, 255, 255, 255, 255 );
+
 	while( y < ScreenHeight + h)
 	{
 		while( x < ScreenWidth + w )
 		{
-			Draw_Pic( x, y, hImage );
-			
+			engfuncs.pfnPIC_Draw( x, y, w, h, NULL );
+
 			x += w;
 		}
 		x = 0;
@@ -3761,6 +3778,8 @@ void UI_Redraw( float flTime )
 {
 	if (m_state == m_none)
 		return;
+
+	m_scale = max( 1, min( ScreenWidth / 320, ScreenHeight / 240 ));
 
 	if (!m_recursiveDraw)
 	{

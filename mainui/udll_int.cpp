@@ -20,10 +20,12 @@ ui_enginefuncs_t engfuncs;
 ui_globalvars_t	*gpGlobals;
 qboolean visible;
 HIMAGE player_image;
+HIMAGE conchars_image;
 
 int UI_VidInit( void )
 {
 	player_image = Draw_CachePic( "gfx/menuplyr.lmp", PIC_KEEP_SOURCE );
+	conchars_image = Draw_CachePic( "gfx/conchars" );
 	engfuncs.pfnSetConsoleDefaultColor( 192, 192, 192 );
 	return 1;
 }
