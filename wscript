@@ -126,7 +126,7 @@ def configure(conf):
 			'-Werror=tautological-compare',
 			'-Werror=use-after-free=3',
 			'-Werror=vla',
-			# '-Werror=write-strings',
+			'-Werror=write-strings',
 
 			# unstable diagnostics, may cause false positives
 			'-Winit-self',

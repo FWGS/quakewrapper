@@ -153,7 +153,7 @@ extern void UTIL_StringToVector( float *pVector, const char *pString );
 extern void UTIL_StringToIntArray( int *pVector, int count, const char *pString );
 extern void UTIL_StringToFloatArray( float *pVector, int count, const char *pString );
 extern BOOL UTIL_CheckSpriteFullBright( struct model_s *mod );
-extern void UTIL_LogPrintf( char *fmt, ... );
+extern void UTIL_LogPrintf( const char *fmt, ... );
 
 void CRC_Init( word *crcvalue );
 void CRC_ProcessByte( word *crcvalue, byte data );

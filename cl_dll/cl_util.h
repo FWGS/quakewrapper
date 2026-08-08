@@ -133,7 +133,7 @@ inline void CenterPrint( const char *string )
 #define GetPlayerInfo (*gEngfuncs.pfnGetPlayerInfo)
 
 // sound functions
-inline void PlaySound( char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
+inline void PlaySound( const char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
 inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( iSound, vol ); }
 
 #define Q_max(a, b)  (((a) > (b)) ? (a) : (b))
@@ -166,7 +166,7 @@ inline void UnpackRGB(int &r, int &g, int &b, unsigned int ulRGB)\
 }
 
 HSPRITE LoadSprite(const char *pszName);
-char* UTIL_VarArgs( char *format, ... );
+char* UTIL_VarArgs( const char *format, ... );
 int UTIL_IntegerToString( int num, char *buf );
 void CL_AllocBeam( const char *model, int ent, Vector start, Vector end );
 void CL_ClearBeams( void );

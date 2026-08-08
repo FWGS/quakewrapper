@@ -154,7 +154,7 @@ typedef struct enginefuncs_s
 	const char* (*pfnCVarGetString)( const char *szVarName );
 	void	(*pfnCVarSetFloat)( const char *szVarName, float flValue );
 	void	(*pfnCVarSetString)( const char *szVarName, const char *szValue );
-	void	(*pfnAlertMessage)( ALERT_TYPE atype, char *szFmt, ... );
+	void	(*pfnAlertMessage)( ALERT_TYPE atype, const char *szFmt, ... );
 	void	(*pfnEngineFprintf)( FILE *pfile, char *szFmt, ... );
 	void*	(*pfnPvAllocEntPrivateData)( edict_t *pEdict, long cb );
 	void*	(*pfnPvEntPrivateData)( edict_t *pEdict );
@@ -200,9 +200,9 @@ typedef struct enginefuncs_s
 	void	(*pfnRunPlayerMove)( edict_t *fakeclient, const float *viewangles, float forwardmove, float sidemove, float upmove, unsigned short buttons, byte impulse, byte msec );
 	int	(*pfnNumberOfEntities)( void );
 	char*	(*pfnGetInfoKeyBuffer)( edict_t *e );			// passing in NULL gets the serverinfo
-	char*	(*pfnInfoKeyValue)( char *infobuffer, char *key );
-	void	(*pfnSetKeyValue)( char *infobuffer, char *key, char *value );
-	void	(*pfnSetClientKeyValue)( int clientIndex, char *infobuffer, char *key, char *value );
+	char*	(*pfnInfoKeyValue)( const char *infobuffer, const char *key );
+	void	(*pfnSetKeyValue)( char *infobuffer, const char *key, const char *value );
+	void	(*pfnSetClientKeyValue)( int clientIndex, char *infobuffer, const char *key, const char *value );
 	int	(*pfnIsMapValid)( char *filename );
 	void	(*pfnStaticDecal)( const float *origin, int decalIndex, int entityIndex, int modelIndex );
 	int	(*pfnPrecacheGeneric)( const char *s );
@@ -227,7 +227,7 @@ typedef struct enginefuncs_s
 
 	void	(*pfnDeltaSetField)	( struct delta_s *pFields, const char *fieldname );
 	void	(*pfnDeltaUnsetField)( struct delta_s *pFields, const char *fieldname );
-	void	(*pfnDeltaAddEncoder)( char *name, void (*conditionalencode)( struct delta_s *pFields, const unsigned char *from, const unsigned char *to ) );
+	void	(*pfnDeltaAddEncoder)( const char *name, void (*conditionalencode)( struct delta_s *pFields, const unsigned char *from, const unsigned char *to ) );
 	int	(*pfnGetCurrentPlayer)( void );
 	int	(*pfnCanSkipPlayer)( const edict_t *player );
 	int	(*pfnDeltaFindField)( struct delta_s *pFields, const char *fieldname );
@@ -244,7 +244,7 @@ typedef struct enginefuncs_s
 
 	void	(*pfnGetPlayerStats)( const edict_t *pClient, int *ping, int *packet_loss );
 
-	void	(*pfnAddServerCommand)( char *cmd_name, void (*function) (void) );
+	void	(*pfnAddServerCommand)( const char *cmd_name, void (*function) (void) );
 
 	// For voice communications, set which clients hear eachother.
 	// NOTE: these functions take player entity indices (starting at 1).

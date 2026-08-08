@@ -60,7 +60,7 @@ enum FMOD_ERRORS
 	FMOD_ERR_CDDEVICE          /* An error occured trying to open the specified CD device */
 };
 
-static char *FMOD_ErrorString(int errcode)
+static const char *FMOD_ErrorString(int errcode)
 {
 	switch( errcode )
 	{
