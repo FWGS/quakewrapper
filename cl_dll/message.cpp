@@ -260,13 +260,59 @@ void CHudMessage::MessageScanStart( void )
 }
 
 
+// the rerelease ships strings without manual line breaks, relying on the client to word-wrap them.
+static int MessageWrapColumns( void )
+{
+	int avail = ScreenWidth / ( 8 * gHUD.m_iScale ) - 2;
+
+	return Q_max( 40, Q_min( avail, 50 ));
+}
+
+static void MessageWordWrap( char *dst, const char *src, int dst_size, int limit )
+{
+	int col = 0;
+	int lastspace = -1;
+	int i = 0;
+
+	while( *src && i < dst_size - 1 )
+	{
+		char c = *src++;
+		dst[i] = c;
+
+		if( c == '\n' )
+		{
+			col = 0;
+			lastspace = -1;
+		}
+		else
+		{
+			if( c == ' ' )
+				lastspace = i;
+
+			if( ++col > limit && lastspace != -1 )
+			{
+				dst[lastspace] = '\n';
+				col = i - lastspace;
+				lastspace = -1;
+			}
+		}
+
+		i++;
+	}
+
+	dst[i] = '\0';
+}
+
 void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 {
 	int i, j, length, width;
 	const char *pText;
 	const char *pLineStart;
+	static char wrapped[2048];
 
-	pText = pMessage->pMessage;
+	MessageWordWrap( wrapped, pMessage->pMessage, sizeof( wrapped ), MessageWrapColumns( ));
+
+	pText = wrapped;
 	// Count lines
 	m_parms.lines = 1;
 	m_parms.time = time;
@@ -293,7 +339,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 
 
 	m_parms.y = YPosition( pMessage->y, m_parms.totalHeight );
-	pText = pMessage->pMessage;
+	pText = wrapped;
 
 	m_parms.charTime = 0;
 
