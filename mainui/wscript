@@ -19,7 +19,7 @@ def build(bld):
 		'../public']
 	source = bld.path.ant_glob('*.cpp')
 
-	if bld.env.DEST_OS not in ['android', 'dos']:
+	if bld.env.DEST_OS not in ['dos']:
 		install_path = os.path.join(bld.env.GAMEDIR, bld.env.CLIENT_INSTALL_DIR)
 	else:
 		install_path = bld.env.PREFIX
