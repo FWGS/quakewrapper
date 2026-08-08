@@ -162,7 +162,7 @@ void PF_WriteString( void )
 	pr_message_t *msg = &pr.messages[pr.num_messages];
 
 	PF_WriteDest( msg, MSG_STRING, G_FLOAT( OFS_PARM0 ));
-	msg->string = (char *)G_STRING( OFS_PARM1 );
+	msg->string = (char *)PR_LocalizeString( G_STRING( OFS_PARM1 ));
 	pr.num_messages++;
 }
 
@@ -464,6 +464,25 @@ void PR_SendMessage( void )
 			MESSAGE_BEGIN( msg->dest, gmsgHideLMP, msg->entity );
 				WRITE_GENERIC( &pr.messages[msg_num+1] );
 			MESSAGE_END();
+			msg_num += 2;
+			break;
+		case svc_spawnedmonster:
+			// progs already incremented total_monsters, forward the new value
+			MESSAGE_BEGIN( MSG_ALL, gmsgStats );
+				WRITE_BYTE( STAT_TOTALMONSTERS );
+				WRITE_LONG( pr.global_struct->total_monsters );
+			MESSAGE_END();
+			msg_num += 1;
+			break;
+		case svc_achievement:
+			// no achievements system, just log it
+			ALERT( at_console, "Achievement: %s\n", pr.messages[msg_num+1].string );
+			msg_num += 2;
+			break;
+		case svc_localsound:
+			// non-spatialized sound, routed to the message destination
+			g_engfuncs.pfnBuildSoundMsg( msg->entity, CHAN_AUTO, pr.messages[msg_num+1].string,
+				VOL_NORM, ATTN_NONE, 0, PITCH_NORM, msg->dest, 0, g_vecZero, msg->entity );
 			msg_num += 2;
 			break;
 		default:

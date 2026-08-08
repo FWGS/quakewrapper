@@ -21,6 +21,31 @@ GNU General Public License for more details.
 #include "game.h"
 #include "progs.h"
 
+// model precache table stashed between RestoreGlobalState and DispatchCreateEntitiesInRestoreList, see comments in SaveGlobalState
+#define SAVE_MAX_MODELS	4096	// engine MAX_MODELS
+static char *g_savedModelNames[SAVE_MAX_MODELS];
+static int g_savedModelCount = 0;
+
+typedef struct
+{
+	int	modelCount;
+} modeltableheader_t;
+
+typedef struct
+{
+	char	name[64];	// MAX_QPATH
+} modeltableentry_t;
+
+static TYPEDESCRIPTION gModelTableHeader[] =
+{
+	DEFINE_FIELD( modeltableheader_t, modelCount, FIELD_INTEGER ),
+};
+
+static TYPEDESCRIPTION gModelTableEntry[] =
+{
+	DEFINE_ARRAY( modeltableentry_t, name, FIELD_CHARACTER, 64 ),
+};
+
 void DispatchSave( edict_t *pent, SAVERESTOREDATA *pSaveData )
 {
 	pr_entvars_t *pev = (pr_entvars_t *)GET_PRIVATE(pent);
@@ -94,6 +119,30 @@ void DispatchCreateEntitiesInRestoreList( SAVERESTOREDATA *pSaveData, int levelM
 	ENTITYTABLE *pTable;
 	edict_t *pent;
 
+	// rebuild the model precache table in the saved order, so raw model
+	// indices stored in progs fields stay valid after loading
+	if( create_world && g_savedModelCount > 0 )
+	{
+		for( int i = 0; i < g_savedModelCount; i++ )
+		{
+			const char *name = g_savedModelNames[i];
+
+			// inline models are precached with the world and
+			// already occupy their original slots
+			if( !name[0] || name[0] == '*' )
+				continue;
+
+			int idx = PRECACHE_MODEL( STRING( ALLOC_STRING( name )));
+
+			if( idx != i + 1 )
+				ALERT( at_warning, "%s: model %s expected index %i, got %i\n", __func__, name, i + 1, idx );
+		}
+
+		for( int i = 0; i < g_savedModelCount; i++ )
+			free( g_savedModelNames[i] );
+		g_savedModelCount = 0;
+	}
+
 	// create entity list
 	for( int i = 0; i < pSaveData->tableCount; i++ )
 	{
@@ -166,6 +215,32 @@ void SaveGlobalState( SAVERESTOREDATA *pSaveData )
 {
 	CSave saveHelper( pSaveData );
 	saveHelper.WriteGlobalFields( "GLOBALS", pr.globals, pr.globaldefs, pr.progs->numglobaldefs );
+
+	// progs can store raw model indices in custom entity fields,
+	// for example, rerelease infected monsters keep one in modelindex_transformed
+	// so the model precache table must be rebuilt in exactly the same order
+	// on restore for such indices to stay valid
+	modeltableheader_t hdr = { 0 };
+
+	for( int i = 1; i < SAVE_MAX_MODELS; i++ )
+	{
+		const char *name = MODEL_NAME( i );
+
+		if( !name || !name[0] )
+			break;
+
+		hdr.modelCount = i;
+	}
+
+	saveHelper.WriteFields( "MODELTABLE", &hdr, gModelTableHeader, ARRAYSIZE( gModelTableHeader ));
+
+	for( int i = 1; i <= hdr.modelCount; i++ )
+	{
+		modeltableentry_t entry;
+
+		Q_strncpy( entry.name, MODEL_NAME( i ), sizeof( entry.name ));
+		saveHelper.WriteFields( "MODELNAME", &entry, gModelTableEntry, ARRAYSIZE( gModelTableEntry ));
+	}
 }
 
 void RestoreGlobalState( SAVERESTOREDATA *pSaveData )
@@ -181,6 +256,29 @@ void RestoreGlobalState( SAVERESTOREDATA *pSaveData )
 	// QUOTH issues. Reset the framecount to properly precache
 	eval_t *val = GETEGLOBALVALUE( pr.glob_framecount );
 	if( val ) val->value = 0.0f;
+
+	// stash the saved model table. it can't be precached right here,
+	// the server is not spawned yet: this is done later in
+	// DispatchCreateEntitiesInRestoreList
+	for( int i = 0; i < g_savedModelCount; i++ )
+		free( g_savedModelNames[i] );
+	g_savedModelCount = 0;
+
+	modeltableheader_t hdr = { 0 };
+
+	if( !restoreHelper.Empty() && restoreHelper.ReadFields( "MODELTABLE", &hdr, gModelTableHeader, ARRAYSIZE( gModelTableHeader )))
+	{
+		hdr.modelCount = bound( 0, hdr.modelCount, SAVE_MAX_MODELS - 1 );
+
+		for( int i = 0; i < hdr.modelCount; i++ )
+		{
+			modeltableentry_t entry = { 0 };
+
+			restoreHelper.ReadFields( "MODELNAME", &entry, gModelTableEntry, ARRAYSIZE( gModelTableEntry ));
+			entry.name[sizeof( entry.name ) - 1] = '\0';
+			g_savedModelNames[g_savedModelCount++] = strdup( entry.name );
+		}
+	}
 }
 
 void ResetGlobalState( void )

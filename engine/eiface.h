@@ -355,10 +355,10 @@ typedef enum _fieldtypes
 #define FTYPEDESC_KEY		0x0004		// This field can be requested and written to by string name at load time
 #define FTYPEDESC_FUNCTIONTABLE	0x0008		// This is a table entry for a member function pointer
 
-typedef struct 
+typedef struct
 {
 	FIELDTYPE		fieldType;
-	char		*fieldName;
+	const char		*fieldName;
 	int		fieldOffset;
 	short		fieldSize;
 	short		flags;

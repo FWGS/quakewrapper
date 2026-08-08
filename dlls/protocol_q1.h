@@ -62,6 +62,17 @@ GNU General Public License for more details.
 #define svc_skybox			37	// [string] skyname
 
 //
+// 2021 rerelease expansion
+//
+#define svc_spawnedmonster  39 // no args, bumps total monsters counter
+#define svc_achievement     52 // [string] achievement id
+#define svc_chat            53 // unknown
+#define svc_levelcompleted  54 // unknown
+#define svc_backtolobby     55 // unknown
+#define svc_localsound      56 // [string] sample
+#define svc_prompt          57 // unknown
+
+//
 // temp entity events
 //
 #define TE_SPIKE			0
