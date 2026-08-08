@@ -30,6 +30,7 @@ def build(bld):
 		name     = 'menu',
 		features = 'cxx',
 		includes = includes,
+		use      = 'game_shared',
 		install_path = install_path,
 		subsystem = bld.env.MSVC_SUBSYSTEM,
 		idx = bld.get_taskgen_count()

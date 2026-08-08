@@ -22,6 +22,8 @@ extern "C"
 #include "netadr.h"
 }
 
+#include "stringlib.h"
+
 enum
 {
 	KEY_CONSOLE = 0,
@@ -126,8 +128,6 @@ inline int Draw_PicWidth( HIMAGE pic )
 {
 	return engfuncs.pfnPIC_Width( pic );
 }
-
-char *va( const char *fmt, ... );
 
 extern char com_gamedir[64];
 extern int hipnotic, rogue, nehahra;

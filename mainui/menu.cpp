@@ -138,48 +138,6 @@ int		demo_cursor;
 /* Support Routines */
 
 /*
-============
-COM_FileBase
-============
-*/
-// Extracts the base name of a file (no path, no extension, assumes '/' as path separator)
-void COM_FileBase ( const char *in, char *out )
-{
-	int len, start, end;
-
-	len = strlen( in );
-	
-	// scan backward for '.'
-	end = len - 1;
-	while ( end && in[end] != '.' && in[end] != '/' && in[end] != '\\' )
-		end--;
-	
-	if ( in[end] != '.' )		// no '.', copy to end
-		end = len-1;
-	else 
-		end--;			// Found ',', copy to left of '.'
-
-
-	// Scan backward for '/'
-	start = len-1;
-	while ( start >= 0 && in[start] != '/' && in[start] != '\\' )
-		start--;
-
-	if ( in[start] != '/' && in[start] != '\\' )
-		start = 0;
-	else 
-		start++;
-
-	// Length of new sting
-	len = end - start + 1;
-
-	// Copy partial string
-	strncpy( out, &in[start], len );
-	// Terminate it
-	out[len] = 0;
-}
-
-/*
 ===============
 Info_ValueForKey
 
@@ -223,21 +181,6 @@ const char *Info_ValueForKey( const char *s, const char *key )
 		if( !*s ) return "";
 		s++;
 	}
-}
-
-char *va( const char *format, ... )
-{
-	va_list		argptr;
-	static char	string[256][1024], *s;
-	static int	stringindex = 0;
-
-	s = string[stringindex];
-	stringindex = (stringindex + 1) & 255;
-	va_start( argptr, format );
-	_vsnprintf( s, sizeof( string[0] ), format, argptr );
-	va_end( argptr );
-
-	return s;
 }
 
 int	m_scale = 1;
@@ -990,8 +933,8 @@ void M_Menu_Setup_f (void)
 	UI_SetActiveMenu(1);
 	m_state = m_setup;
 	m_entersound = true;
-	strcpy(setup_myname, Cvar_GetString("name"));
-	strcpy(setup_hostname, Cvar_GetString("hostname"));
+	Q_strncpy(setup_myname, Cvar_GetString("name"), sizeof(setup_myname));
+	Q_strncpy(setup_hostname, Cvar_GetString("hostname"), sizeof(setup_hostname));
 	setup_top = setup_oldtop = Cvar_GetValue("topcolor");
 	setup_bottom = setup_oldbottom = Cvar_GetValue("bottomcolor");
 	engfuncs.pfnProcessImage( player_image, -1.0f, setup_top, setup_bottom);
