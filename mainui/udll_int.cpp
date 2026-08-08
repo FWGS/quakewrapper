@@ -34,10 +34,6 @@ void UI_Shutdown( void )
 {
 }
 
-void UI_MouseMove( int x, int y )
-{
-}
-
 void UI_GetCursorPos( int *pos_x, int *pos_y )
 {
 }

@@ -185,6 +185,11 @@ const char *Info_ValueForKey( const char *s, const char *key )
 
 int	m_scale = 1;
 
+// last known mouse position in virtual 320x240 coordinates, -1 if outside the menu box
+int	m_mouse_x = -1;
+int	m_mouse_y = -1;
+int	m_slider_drag = -1;
+
 // map virtual 320x240 coordinates to real screen, scaled and centered
 static int M_ScaleX (int x)
 {
@@ -1969,6 +1974,7 @@ void M_Menu_Help_f (void)
 void M_Help_Draw (void)
 {
 	M_DrawPic (0, 0, Draw_CachePic ( va("gfx/help%i.lmp", help_page)) );
+	M_Print (320 - 5*8, 6, "back");
 }
 
 
@@ -3437,6 +3443,11 @@ void M_ServerList_Draw (void)
 	}
 	M_DrawCharacter (0, 32 + (slist_cursor - slist_low)*8, 12+((int)(realtime*4)&1));
 
+	if (slist_low > 0)
+		M_PrintWhite (300, 32, "^");
+	if (slist_low + MAX_SHOW_HOSTS < hostCacheCount)
+		M_PrintWhite (300, 152, "v");
+
 	if (*m_return_reason)
 		M_PrintWhite (16, 148, m_return_reason);
 }
@@ -3579,7 +3590,11 @@ void M_Mods_Draw( void )
 	}
 	
 	M_DrawCharacter (0, 32 + (modcursor - modlow)*8, 12+((int)(realtime*4)&1));
-	
+
+	if( modlow > 0 )
+		M_PrintWhite( 300, 32, "^" );
+	if( modlow + MAX_SHOW_MODS < mods )
+		M_PrintWhite( 300, 152, "v" );
 }
 
 void M_Mods_Key( int k )
@@ -3717,6 +3732,236 @@ void M_DrawTile()
 	}
 }
 
+// returns row index under the mouse for a uniform list starting at first_y, or -1
+static int M_MouseRow (int first_y, int row_h, int count)
+{
+	int row;
+
+	if (m_mouse_x < 0 || m_mouse_y < first_y)
+		return -1;
+
+	row = (m_mouse_y - first_y) / row_h;
+
+	if (row >= count)
+		return -1;
+
+	return row;
+}
+
+// same for menus with an explicit row y table (8px text rows)
+static int M_MouseRowTable (const int *table, int count)
+{
+	int i;
+
+	if (m_mouse_x < 0)
+		return -1;
+
+	for (i = 0; i < count; i++)
+	{
+		if (m_mouse_y >= table[i] && m_mouse_y < table[i] + 8)
+			return i;
+	}
+
+	return -1;
+}
+
+static void M_SetSlider (int row, float frac)
+{
+	frac = bound (0, frac, 1);
+	options_cursor = row;
+
+	switch (row)
+	{
+	case 4:	// screen size, steps of 10
+		Cvar_SetValue ("viewsize", 30 + (int)(frac * 9 + 0.5) * 10);
+		break;
+	case 5:	// gamma
+		Cvar_SetValue ("gamma", 0.5 + frac * 2.5);
+		break;
+	case 6:	// mouse speed
+		Cvar_SetValue ("sensitivity", 1 + frac * 10);
+		break;
+	case 7:	// music volume
+		Cvar_SetValue ("MP3Volume", frac);
+		break;
+	case 8:	// sfx volume
+		Cvar_SetValue ("volume", frac);
+		break;
+	}
+}
+
+static qboolean M_MouseScrollList (qboolean click, int *low, int *cursor, int page, int count)
+{
+	if (!click || m_mouse_x < 288)
+		return FALSE;
+
+	if (m_mouse_y >= 32 && m_mouse_y < 48 && *low > 0)
+	{
+		*low = max (*low - page, 0);
+		*cursor = min (*cursor, *low + page - 1);
+		return TRUE;
+	}
+
+	if (m_mouse_y >= 144 && m_mouse_y < 160 && *low + page < count)
+	{
+		*low = min (*low + page, count - page);
+		*cursor = max (*cursor, *low);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static qboolean M_MouseSelect (qboolean click)
+{
+	void	(*keyfunc)(int key) = NULL;
+	int		row = -1;
+
+	switch (m_state)
+	{
+	case m_main:
+		row = M_MouseRow (32, 20, MAIN_ITEMS);
+		if (row != -1) m_main_cursor = row;
+		keyfunc = M_Main_Key;
+		break;
+
+	case m_demo:
+		row = M_MouseRow (16, 8, NumberOfDemos);
+		if (row != -1) demo_cursor = row;
+		keyfunc = M_Demo_Key;
+		break;
+
+	case m_singleplayer:
+		row = M_MouseRow (32, 20, SINGLEPLAYER_ITEMS);
+		if (row != -1) m_singleplayer_cursor = row;
+		keyfunc = M_SinglePlayer_Key;
+		break;
+
+	case m_load:
+	case m_save:
+		row = M_MouseRow (32, 8, MAX_SAVEGAMES);
+		if (row != -1) load_cursor = row;
+		keyfunc = (m_state == m_load) ? M_Load_Key : M_Save_Key;
+		break;
+
+	case m_multiplayer:
+		row = M_MouseRow (32, 20, MULTIPLAYER_ITEMS);
+		if (row != -1) m_multiplayer_cursor = row;
+		keyfunc = M_MultiPlayer_Key;
+		break;
+
+	case m_setup:
+		row = M_MouseRowTable (setup_cursor_table, NUM_SETUP_CMDS);
+		if (row != -1) setup_cursor = row;
+		keyfunc = M_Setup_Key;
+		break;
+
+	case m_net:
+		row = M_MouseRow (32, 20, m_net_items);
+		if (row != -1) m_net_cursor = row;
+		keyfunc = M_Net_Key;
+		break;
+
+	case m_options:
+		row = M_MouseRow (32, 8, OPTIONS_ITEMS);
+		if (row != -1) options_cursor = row;
+		if (click && row >= 4 && row <= 8 && m_mouse_x >= 212)
+		{
+			// grab the slider: set from click position, then follow the drag
+			m_slider_drag = row;
+			M_SetSlider (row, (m_mouse_x - 220) / (float)((SLIDER_RANGE - 1) * 8));
+			return TRUE;
+		}
+		keyfunc = M_Options_Key;
+		break;
+
+	case m_keys:
+		if (bind_grab)
+			return FALSE;	// let K_MOUSE1 reach the bind grabber
+		row = M_MouseRow (48, 8, (int)NUMCOMMANDS);
+		if (row != -1) keys_cursor = row;
+		keyfunc = M_Keys_Key;
+		break;
+
+	case m_help:
+		if (click)
+		{
+			if (m_mouse_x >= 272 && m_mouse_y < 20)
+				M_Help_Key (K_ESCAPE);	// "back" label in the top right corner
+			else
+				M_Help_Key (K_UPARROW);	// tap anywhere else: next page
+		}
+		return click;
+
+	case m_lanconfig:
+		row = M_MouseRowTable (lanConfig_cursor_table, NUM_LANCONFIG_CMDS);
+		if (StartingGame && row >= 2)
+			row = -1;	// only Port and OK exist when hosting
+		if (row != -1) lanConfig_cursor = row;
+		keyfunc = M_LanConfig_Key;
+		break;
+
+	case m_gameoptions:
+		row = M_MouseRowTable (gameoptions_cursor_table, NUM_GAMEOPTIONS);
+		if (row != -1) gameoptions_cursor = row;
+		keyfunc = M_GameOptions_Key;
+		break;
+
+	case m_slist:
+		if (M_MouseScrollList (click, &slist_low, &slist_cursor, MAX_SHOW_HOSTS, hostCacheCount))
+			return TRUE;
+		row = M_MouseRow (32, 8, min (hostCacheCount, slist_low + MAX_SHOW_HOSTS) - slist_low);
+		if (row != -1) slist_cursor = slist_low + row;
+		keyfunc = M_ServerList_Key;
+		break;
+
+	case m_mods:
+		if (M_MouseScrollList (click, &modlow, &modcursor, MAX_SHOW_MODS, mods))
+			return TRUE;
+		row = M_MouseRow (32, 8, min (modlow + MAX_SHOW_MODS, mods) - modlow);
+		if (row != -1) modcursor = modlow + row;
+		keyfunc = M_Mods_Key;
+		break;
+
+	default:
+		return FALSE;	// video, quit, search: keyboard only
+	}
+
+	if (row == -1)
+		return FALSE;
+
+	if (click)
+		keyfunc (K_ENTER);
+
+	return TRUE;
+}
+
+void UI_MouseMove( int x, int y )
+{
+	x -= (ScreenWidth - 320 * m_scale) >> 1;
+	y -= (ScreenHeight - 240 * m_scale) >> 1;
+	x /= m_scale;
+	y /= m_scale;
+
+	// a grabbed slider follows the mouse even outside the track
+	if (m_slider_drag != -1 && m_state == m_options)
+	{
+		M_SetSlider (m_slider_drag, (x - 220) / (float)((SLIDER_RANGE - 1) * 8));
+		return;
+	}
+
+	if (x < 0 || y < 0 || x >= 320 || y >= 240)
+	{
+		m_mouse_x = m_mouse_y = -1;
+		return;
+	}
+
+	m_mouse_x = x;
+	m_mouse_y = y;
+
+	M_MouseSelect (FALSE);
+}
+
 void UI_Redraw( float flTime )
 {
 	if (m_state == m_none)
@@ -3848,8 +4093,20 @@ void UI_Redraw( float flTime )
 void UI_KeyEvent(int key, int down)
 {
 	if( !down )
+	{
+		if( key == K_MOUSE1 )
+			m_slider_drag = -1;
 		return;
-	
+	}
+
+	// scroll wheel walks the menus like the arrow keys,
+	// except while grabbing a key bind where it must stay itself
+	if(( key == K_MWHEELUP || key == K_MWHEELDOWN ) && !( m_state == m_keys && bind_grab ))
+		key = ( key == K_MWHEELUP ) ? K_UPARROW : K_DOWNARROW;
+
+	if( key == K_MOUSE1 && M_MouseSelect( TRUE ))
+		return;
+
 	/*if( key == '`' )
 	{
 		UI_SetActiveMenu( FALSE );
