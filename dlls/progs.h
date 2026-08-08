@@ -213,6 +213,12 @@ void _PR_ValidateString( const char *s, const char *filename, const int fileline
 void PR_InstallBuiltins( void );
 
 //
+// pr_localize.cpp
+//
+void PR_LocalizeInit( void );
+const char *PR_LocalizeString( const char *str );
+
+//
 // pr_message.cpp
 //
 void PF_WriteByte( void );

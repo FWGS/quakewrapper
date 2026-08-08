@@ -268,6 +268,9 @@ void GameDLLInit( void )
 	// ripped out from quake
 	COM_CheckRegistered ();
 
+	// load rerelease localization strings before progs may reference them
+	PR_LocalizeInit();
+
 	PR_LoadProgs( "progs.dat" );
 }
 
