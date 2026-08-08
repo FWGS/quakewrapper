@@ -94,7 +94,7 @@ void CHud :: ScrapUpload( void )
 	{
 		sprintf( scrap_name, "#scrap%i.lmp", texnum );
 		memcpy( p, scrap_texels[texnum], BLOCK_WIDTH * BLOCK_HEIGHT );
-		scrap_texnums[texnum] = gRenderfuncs.GL_LoadTexture( scrap_name, buffer, img_size, TF_CLAMP|TF_NOMIPMAP ); 
+		scrap_texnums[texnum] = gRenderfuncs.GL_LoadTexture( scrap_name, buffer, img_size, TF_CLAMP|TF_NOMIPMAP|TF_NEAREST );
 	}
 
 	scrap_dirty = false;
@@ -158,7 +158,7 @@ glpic_t *CHud :: DrawPicFromWad( const char *name, bool fullpath )
 	}
 	else
 	{
-		gl->texnum = gRenderfuncs.GL_LoadTexture( path, NULL, 0, TF_CLAMP|TF_NOMIPMAP );
+		gl->texnum = gRenderfuncs.GL_LoadTexture( path, NULL, 0, TF_CLAMP|TF_NOMIPMAP|TF_NEAREST );
 		gl->scrap = false;
 		gl->sl = 0.0f;
 		gl->sh = 1.0f;
@@ -183,14 +183,17 @@ glpic_t *CHud :: DrawPicFromWad( const char *name, bool fullpath )
 Draw_PicGeneric
 =============
 */
-void CHud :: DrawPicGeneric( int x, int y, glpic_t *gl )
+void CHud :: DrawPicGeneric( int x, int y, glpic_t *gl, int alpha )
 {
 	if( !gl ) return;
 
 	if( scrap_dirty )
 		ScrapUpload();
 
-	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	int w = gl->width * m_iScale;
+	int h = gl->height * m_iScale;
+
+	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, Q_min( alpha, 255 ) / 255.0f );
 
 	if( gl->scrap )
 		gRenderfuncs.GL_Bind( 0, scrap_texnums[gl->texnum] );
@@ -200,12 +203,81 @@ void CHud :: DrawPicGeneric( int x, int y, glpic_t *gl )
 	gEngfuncs.pTriAPI->TexCoord2f( gl->sl, gl->tl );
 	gEngfuncs.pTriAPI->Vertex3f( x, y, 0.0f );
 	gEngfuncs.pTriAPI->TexCoord2f( gl->sh, gl->tl );
-	gEngfuncs.pTriAPI->Vertex3f( x + gl->width, y, 0.0f );
+	gEngfuncs.pTriAPI->Vertex3f( x + w, y, 0.0f );
 	gEngfuncs.pTriAPI->TexCoord2f( gl->sh, gl->th );
-	gEngfuncs.pTriAPI->Vertex3f( x + gl->width, y + gl->height, 0.0f );
+	gEngfuncs.pTriAPI->Vertex3f( x + w, y + h, 0.0f );
 	gEngfuncs.pTriAPI->TexCoord2f( gl->sl, gl->th );
-	gEngfuncs.pTriAPI->Vertex3f( x, y + gl->height, 0.0f );
+	gEngfuncs.pTriAPI->Vertex3f( x, y + h, 0.0f );
 	gEngfuncs.pTriAPI->End ();
+}
+
+/*
+=============
+Draw_Character
+
+conchars glyph, 16x16 atlas grid
+=============
+*/
+void CHud :: DrawCharacter( int x, int y, int num, int r, int g, int b, int a )
+{
+	float	row, col, size;
+	int	w = 8 * m_iScale;
+
+	num &= 255;
+
+	if( num == ' ' ) return;
+	if( y <= -w ) return;
+	if( a <= 0 ) return;
+
+	col = (num & 15) * 0.0625f + (0.5f / 256.0f);
+	row = (num >> 4) * 0.0625f + (0.5f / 256.0f);
+	size = 0.0625f - (1.0f / 256.0f);
+
+	// vertex alpha only reaches GL through Color4f in kRenderTransAlpha mode
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+	gEngfuncs.pTriAPI->Color4f( r / 255.0f, g / 255.0f, b / 255.0f, Q_min( a, 255 ) / 255.0f );
+	gRenderfuncs.GL_Bind( 0, m_iConcharsTex );
+
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	gEngfuncs.pTriAPI->TexCoord2f( col, row );
+	gEngfuncs.pTriAPI->Vertex3f( x, y, 0.0f );
+	gEngfuncs.pTriAPI->TexCoord2f( col + size, row );
+	gEngfuncs.pTriAPI->Vertex3f( x + w, y, 0.0f );
+	gEngfuncs.pTriAPI->TexCoord2f( col + size, row + size );
+	gEngfuncs.pTriAPI->Vertex3f( x + w, y + w, 0.0f );
+	gEngfuncs.pTriAPI->TexCoord2f( col, row + size );
+	gEngfuncs.pTriAPI->Vertex3f( x, y + w, 0.0f );
+	gEngfuncs.pTriAPI->End ();
+
+	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+}
+
+int CHud :: DrawString( int x, int y, const char *str, int r, int g, int b )
+{
+	for( ; *str; str++, x += 8 * m_iScale )
+		DrawCharacter( x, y, (byte)*str, r, g, b );
+
+	return x;
+}
+
+void CHud :: DrawFill( int x, int y, int w, int h, int r, int g, int b, int a )
+{
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+	gEngfuncs.pTriAPI->Color4f( r / 255.0f, g / 255.0f, b / 255.0f, Q_min( a, 255 ) / 255.0f );
+	gRenderfuncs.GL_Bind( 0, m_iWhiteTex );
+
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f );
+	gEngfuncs.pTriAPI->Vertex3f( x, y, 0.0f );
+	gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f );
+	gEngfuncs.pTriAPI->Vertex3f( x + w, y, 0.0f );
+	gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f );
+	gEngfuncs.pTriAPI->Vertex3f( x + w, y + h, 0.0f );
+	gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f );
+	gEngfuncs.pTriAPI->Vertex3f( x, y + h, 0.0f );
+	gEngfuncs.pTriAPI->End ();
+
+	gEngfuncs.pTriAPI->Color4ub( 255, 255, 255, 255 );
 }
 
 /*
@@ -213,10 +285,10 @@ void CHud :: DrawPicGeneric( int x, int y, glpic_t *gl )
 Draw_Pic
 =============
 */
-void CHud :: DrawPic( int x, int y, glpic_t *pic )
+void CHud :: DrawPic( int x, int y, glpic_t *pic, int alpha )
 {
-	gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
-	DrawPicGeneric( x, y, pic );
+	gEngfuncs.pTriAPI->RenderMode( alpha < 255 ? kRenderTransAlpha : kRenderNormal );
+	DrawPicGeneric( x, y, pic, alpha );
 }
 
 /*

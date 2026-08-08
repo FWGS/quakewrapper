@@ -60,11 +60,9 @@ int CHud :: Redraw( float flTime, int intermission )
 	// draw the classic Quake crosshair
 	if ( m_pCvarCrosshair->value && !m_iIntermission && !m_iHideHUDDisplay && stats[STAT_HEALTH] > 0 )
 	{
-		char crossChar = '+';
+		int size = 8 * m_iScale;
 
-		int xPos = (ScreenWidth - gHUD.m_scrinfo.charWidths[crossChar]) / 2;
-		int yPos = (ScreenHeight - gHUD.m_scrinfo.iCharHeight) / 2;
-		TextMessageDrawChar( xPos, yPos, crossChar, 255, 255, 255 );
+		DrawCharacter( (ScreenWidth - size) / 2, (ScreenHeight - size) / 2, '+' );
 	}
 	
 	if ( m_pCvarDraw->value )
@@ -96,12 +94,12 @@ int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, const char *szIt, int r
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int next = xpos + gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos + 8 * m_iScale;
 		if ( next > iMaxX )
 			return xpos;
 
-		TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
-		xpos = next;		
+		DrawCharacter( xpos, ypos, (byte)*szIt, r, g, b );
+		xpos = next;
 	}
 
 	return xpos;
@@ -125,14 +123,14 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szS
 	}
 
 	// iterate throug the string in reverse
-	for ( szIt--;  szIt != (szString-1);  szIt-- )	
+	for ( szIt--;  szIt != (szString-1);  szIt-- )
 	{
-		int next = xpos - gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos - 8 * m_iScale;
 		if ( next < iMinX )
 			return xpos;
 		xpos = next;
 
-		TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
+		DrawCharacter( xpos, ypos, (byte)*szIt, r, g, b );
 	}
 
 	return xpos;

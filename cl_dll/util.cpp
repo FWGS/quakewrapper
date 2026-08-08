@@ -115,21 +115,6 @@ void VectorMA (const float *veca, float scale, const float *vecb, float *vecc)
 	vecc[2] = veca[2] + scale*vecb[2];
 }
 
-HSPRITE LoadSprite(const char *pszName)
-{
-	int i;
-	char sz[256]; 
-
-	if (ScreenWidth < 640)
-		i = 320;
-	else
-		i = 640;
-
-	sprintf(sz, pszName, i);
-
-	return SPR_Load(sz);
-}
-
 // g-cont. copied from game.dll
 char* UTIL_VarArgs( const char *format, ... )
 {

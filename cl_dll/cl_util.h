@@ -52,25 +52,8 @@ inline char* CVAR_GET_STRING( const char *x ) {	return gEngfuncs.pfnGetCvarStrin
 inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int flags ) {	return gEngfuncs.pfnRegisterVariable( (char*)cv, (char*)val, flags ); }
 #define CVAR_TO_BOOL( x )		((x) && ((x)->value != 0.0f) ? true : false )
 
-#define SPR_Load (*gEngfuncs.pfnSPR_Load)
-#define SPR_Set (*gEngfuncs.pfnSPR_Set)
-#define SPR_Frames (*gEngfuncs.pfnSPR_Frames)
-#define SPR_GetList (*gEngfuncs.pfnSPR_GetList)
-
-// SPR_Draw  draws a the current sprite as solid
-#define SPR_Draw (*gEngfuncs.pfnSPR_Draw)
-// SPR_DrawHoles  draws the current sprites,  with color index255 not drawn (transparent)
-#define SPR_DrawHoles (*gEngfuncs.pfnSPR_DrawHoles)
-// SPR_DrawAdditive  adds the sprites RGB values to the background  (additive transulency)
-#define SPR_DrawAdditive (*gEngfuncs.pfnSPR_DrawAdditive)
-
-// SPR_EnableScissor  sets a clipping rect for HUD sprites.  (0,0) is the top-left hand corner of the screen.
-#define SPR_EnableScissor (*gEngfuncs.pfnSPR_EnableScissor)
-// SPR_DisableScissor  disables the clipping rect
-#define SPR_DisableScissor (*gEngfuncs.pfnSPR_DisableScissor)
 //
-#define FillRGBA (*gEngfuncs.pfnFillRGBA)
-
+#define FillRGBA gHUD.DrawFill
 
 // ScreenHeight returns the height of the screen, in pixels
 #define ScreenHeight (gHUD.m_scrinfo.iHeight)
@@ -85,7 +68,6 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 #define XPROJECT(x)	( (1.0f+(x))*ScreenWidth*0.5f )
 #define YPROJECT(y) ( (1.0f-(y))*ScreenHeight*0.5f )
 
-#define GetScreenInfo (*gEngfuncs.pfnGetScreenInfo)
 #define ServerCmd (*gEngfuncs.pfnServerCmd)
 #define ClientCmd (*gEngfuncs.pfnClientCmd)
 #define SetCrosshair (*gEngfuncs.pfnSetCrosshair)
@@ -97,27 +79,6 @@ inline int SPR_Height( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Height(x, f)
 inline int SPR_Width( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Width(x, f); }
 
 inline 	client_textmessage_t	*TextMessageGet( const char *pName ) { return gEngfuncs.pfnTextMessageGet( pName ); }
-inline 	int						TextMessageDrawChar( int x, int y, int number, int r, int g, int b ) 
-{ 
-	return gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b ); 
-}
-
-inline int DrawConsoleString( int x, int y, const char *string )
-{
-	return gEngfuncs.pfnDrawConsoleString( x, y, (char*) string );
-}
-
-inline void GetConsoleStringSize( const char *string, int *width, int *height )
-{
-	gEngfuncs.pfnDrawConsoleStringLen( string, width, height );
-}
-
-inline int ConsoleStringLen( const char *string )
-{
-	int _width, _height;
-	GetConsoleStringSize( string, &_width, &_height );
-	return _width;
-}
 
 inline void ConsolePrint( const char *string )
 {
@@ -165,7 +126,6 @@ inline void UnpackRGB(int &r, int &g, int &b, unsigned int ulRGB)\
 	b = ulRGB & 0xFF;\
 }
 
-HSPRITE LoadSprite(const char *pszName);
 char* UTIL_VarArgs( const char *format, ... );
 int UTIL_IntegerToString( int num, char *buf );
 void CL_AllocBeam( const char *model, int ent, Vector start, Vector end );

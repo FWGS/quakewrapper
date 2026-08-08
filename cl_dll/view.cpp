@@ -920,12 +920,26 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	}
 
 	// setup sbar size
-	if (pparams->viewsize >= 120)
-		gHUD.sb_lines = 0;		// no status bar at all
-	else if (pparams->viewsize >= 110)
-		gHUD.sb_lines = 24;		// no inventory
-	else
+	switch ((int)gHUD.m_pCvarSBLines->value)
+	{
+	case 1:
+		gHUD.sb_lines = 0;
+		break;
+	case 2:
+		gHUD.sb_lines = 24;
+		break;
+	case 3:
 		gHUD.sb_lines = 48;
+		break;
+	default:
+		if (pparams->viewsize >= 120)
+			gHUD.sb_lines = 0;		// no status bar at all
+		else if (pparams->viewsize >= 110)
+			gHUD.sb_lines = 24;		// no inventory
+		else
+			gHUD.sb_lines = 48;
+		break;
+	}
 
 	// Add in the punchangle, if any
 	VectorAdd ( pparams->viewangles, pparams->punchangle, pparams->viewangles );

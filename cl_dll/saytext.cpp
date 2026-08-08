@@ -120,7 +120,7 @@ int CHudSayText :: Draw( float flTime )
 		if ( *g_szLineBuffer[i] )
 		{
 			// normal draw
-			DrawConsoleString( LINE_START, y, g_szLineBuffer[i] );
+			gHUD.DrawString( LINE_START, y, g_szLineBuffer[i] );
 		}
 
 		y += line_height;
@@ -199,14 +199,13 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 
 void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )
 {
-	int line_width = 0;
-	GetConsoleStringSize( g_szLineBuffer[line], &line_width, &line_height );
+	line_height = 8 * gHUD.m_iScale;
+	int line_width = strlen( g_szLineBuffer[line] ) * 8 * gHUD.m_iScale;
 
 	if ( (line_width + LINE_START) > MAX_LINE_WIDTH )
 	{ // string is too long to fit on line
 		// scan the string until we find what word is too long,  and wrap the end of the sentence after the word
 		int length = LINE_START;
-		int tmp_len = 0;
 		char *last_break = NULL;
 		for ( char *x = g_szLineBuffer[line]; *x != 0; x++ )
 		{
@@ -225,15 +224,10 @@ void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )
 					break;
 			}
 
-			char buf[2];
-			buf[1] = 0;
-
 			if ( *x == ' ' && x != g_szLineBuffer[line] )  // store each line break,  except for the very first character
 				last_break = x;
 
-			buf[0] = *x;  // get the length of the current character
-			GetConsoleStringSize( buf, &tmp_len, &line_height );
-			length += tmp_len;
+			length += 8 * gHUD.m_iScale;
 
 			if ( length > MAX_LINE_WIDTH )
 			{  // needs to be broken up

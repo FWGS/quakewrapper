@@ -102,6 +102,9 @@ void CHud :: Init( void )
 	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	m_pCvarCrosshair = CVAR_CREATE( "crosshair", "1", FCVAR_ARCHIVE );
+
+	// status bar height override: 0 - follow viewsize, 1 - as if viewsize 120, 2 - viewsize 110, 3 - viewsize 100
+	m_pCvarSBLines = CVAR_CREATE( "hud_sblines", "0", FCVAR_ARCHIVE );
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 
 	// Clear any old HUD list
@@ -149,13 +152,28 @@ CHud :: ~CHud()
 
 void CHud :: VidInit( void )
 {
+	// real window size: pfnGetScreenInfo reports a fake resolution when hud_scale is set
 	m_scrinfo.iSize = sizeof(m_scrinfo);
-	GetScreenInfo(&m_scrinfo);
+	m_scrinfo.iWidth = CVAR_GET_FLOAT( "vid_width" );
+	m_scrinfo.iHeight = CVAR_GET_FLOAT( "vid_height" );
 
 	if (ScreenWidth < 640)
 		m_iRes = 320;
 	else
 		m_iRes = 640;
+
+	// we do still honor hud_scale, just in our way:
+	// 0 = autoscale, otherwise nearest integer clamped to the largest scale the real screen size can fit
+	int maxscale = Q_max( 1, Q_min( ScreenWidth / 320, ScreenHeight / 240 ));
+	float scale = round( CVAR_GET_FLOAT( "hud_scale" ));
+
+	if( scale <= 0.0f )
+		m_iScale = maxscale;
+	else
+		m_iScale = Q_max( 1, Q_min((int)scale, maxscale ));
+
+	m_iConcharsTex = gRenderfuncs.GL_LoadTexture( "gfx/conchars", NULL, 0, TF_CLAMP|TF_NOMIPMAP|TF_NEAREST );
+	m_iWhiteTex = gRenderfuncs.GL_FindTexture( "*white" );
 
 	m_sbar.VidInit();
 	m_Message.VidInit();

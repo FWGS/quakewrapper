@@ -128,7 +128,7 @@ public:
 	int MsgFunc_HideLMP( const char *pszName, int iSize, void *pbuf );
 
 	// drawing funcs
-	void DrawPic( int x, int y, glpic_t *pic, bool showlmp = false );
+	void DrawPic( int x, int y, glpic_t *pic, bool showlmp = false, int alpha = 255 );
 	void DrawTransPic( int x, int y, glpic_t *pic, bool showlmp = false );
 	void DrawString( int x, int y, char *str );
 	void DrawNum( int x, int y, int num, int digits, int color );
@@ -270,7 +270,7 @@ struct message_parms_t
 	int	lines;
 	int	lineLength;
 	int	length;
-	int	r, g, b;
+	int	r, g, b, a;
 	int	text;
 	int	fadeBlend;
 	float	charTime;
@@ -361,6 +361,7 @@ public:
 	cvar_t		*m_pCvarStealMouse;
 	cvar_t		*m_pCvarDraw;
 	cvar_t		*m_pCvarCrosshair;
+	cvar_t		*m_pCvarSBLines;
 	
 	int DrawHudString(int x, int y, int iMaxX, const char *szString, int r, int g, int b );
 	int DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b );
@@ -409,6 +410,10 @@ public:
 	// Screen information
 	SCREENINFO	m_scrinfo;
 
+	int	m_iScale;       // integer HUD scale
+	int	m_iConcharsTex;	// console font replacement
+	int	m_iWhiteTex;	// FillRGBA replacement
+
 	int	m_iIntermission;
 	int	sb_lines;			// Quake sbar height
 	int	showscores;		// show scoreboard
@@ -426,9 +431,16 @@ public:
 	int ScrapAllocBlock( int w, int h, int *x, int *y );
 	void ScrapUpload( void );
 	glpic_t *DrawPicFromWad( const char *name, bool fullpath = false );
-	void DrawPicGeneric( int x, int y, glpic_t *pic );
-	void DrawPic( int x, int y, glpic_t *pic );
+	void DrawPicGeneric( int x, int y, glpic_t *pic, int alpha = 255 );
+	void DrawPic( int x, int y, glpic_t *pic, int alpha = 255 );
 	void DrawTransPic( int x, int y, glpic_t *pic );
+
+	// conchars text, screen coordinates, glyphs are 8 * m_iScale pixels
+	void DrawCharacter( int x, int y, int num, int r = 255, int g = 255, int b = 255, int a = 255 );
+	int DrawString( int x, int y, const char *str, int r = 255, int g = 255, int b = 255 );
+
+	// solid color fill
+	void DrawFill( int x, int y, int w, int h, int r, int g, int b, int a );
 
 	void AddHudElem(CHudBase *p);
 

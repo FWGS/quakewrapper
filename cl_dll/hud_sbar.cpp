@@ -218,25 +218,33 @@ int CHudSBar::VidInit( void )
 	return 1;
 };
 
-void CHudSBar::DrawPic( int x, int y, glpic_t *pic, bool showlmp )
+static void SBar_ScaleCoords( int &x, int &y, bool showlmp )
 {
-	if (!showlmp && !gHUD.m_iIntermission)
-	{
-		x += ((ScreenWidth - 320)>>1);
-		y += (ScreenHeight - SBAR_HEIGHT);
-	}
+	int s = gHUD.m_iScale;
 
-	gHUD.DrawPic( x, y, pic );
+	x = x * s + ((ScreenWidth - 320 * s)>>1);
+
+	if (!showlmp && !gHUD.m_iIntermission)
+		y = y * s + (ScreenHeight - SBAR_HEIGHT * s);
+	else
+		y = y * s + ((ScreenHeight - 240 * s)>>1);
+}
+
+// panels forced over the 3d view are drawn slightly transparent
+static int SBar_BackgroundAlpha( void )
+{
+	return gHUD.m_pCvarSBLines->value >= 2.0f ? 192 : 255;
+}
+
+void CHudSBar::DrawPic( int x, int y, glpic_t *pic, bool showlmp, int alpha )
+{
+	SBar_ScaleCoords( x, y, showlmp );
+	gHUD.DrawPic( x, y, pic, alpha );
 }
 
 void CHudSBar::DrawTransPic( int x, int y, glpic_t *pic, bool showlmp )
 {
-	if (!showlmp && !gHUD.m_iIntermission)
-	{
-		x += ((ScreenWidth - 320)>>1);
-		y += (ScreenHeight - SBAR_HEIGHT);
-	}
-
+	SBar_ScaleCoords( x, y, showlmp );
 	gHUD.DrawTransPic( x, y, pic );
 }
 
@@ -266,18 +274,16 @@ void CHudSBar::DrawNum( int x, int y, int num, int digits, int color )
 
 void CHudSBar::DrawString( int x, int y, char *str )
 {
-	gEngfuncs.pfnDrawSetTextColor( 0.5, 0.5, 0.5 );
-	DrawConsoleString( x + (( ScreenWidth - 320 ) >> 1), y + ScreenHeight - SBAR_HEIGHT + 2, str );
+	y += 2;
+	SBar_ScaleCoords( x, y, false );
+	gHUD.DrawString( x, y, str );
 }
 
 void CHudSBar::DrawCharacter( int x, int y, int num )
 {
-	char str[3];
-
-	str[0] = (char)num;
-	str[1] = '\0';
-
-	DrawString( x, y, str );
+	y += 2;
+	SBar_ScaleCoords( x, y, false );
+	gHUD.DrawCharacter( x, y, num );
 }
 
 void CHudSBar::DrawFace( float flTime )
@@ -329,7 +335,7 @@ void CHudSBar::DrawScoreBoard( float flTime )
 	DrawString( 8, 1, str );
 
 	sprintf( str, "Secrets :%3i /%3i", gHUD.stats[STAT_SECRETS], gHUD.stats[STAT_TOTALSECRETS] );
-	l = ConsoleStringLen( str );
+	l = Q_strlen( str ) * 8;
 	DrawString( 8, 10, str );
 
 	// time
@@ -344,33 +350,34 @@ void CHudSBar::DrawScoreBoard( float flTime )
 	DrawString( 16 + l, 10, levelname );
 }
 
+// virtual 320x240 box coordinates, center is (160, 120)
 void CHudSBar::DrawIntermission( float flTime )
 {
 	int dig, num;
 
-	DrawPic((ScreenWidth*0.5f)-94, (ScreenHeight*0.5f) - 96, sb_completed );
-	DrawTransPic((ScreenWidth*0.5f)-160, (ScreenHeight*0.5f) - 64, sb_inter );
+	DrawPic( 66, 24, sb_completed );
+	DrawTransPic( 0, 56, sb_inter );
 
 	// time
 	dig = completed_time / 60;
-	DrawNum(ScreenWidth*0.5f, (ScreenHeight*0.5f) - 56, dig, 3, 0 );
+	DrawNum( 160, 64, dig, 3, 0 );
 	num = completed_time - dig * 60;
-	DrawTransPic((ScreenWidth*0.5f)+74 ,(ScreenHeight*0.5f)- 56, sb_colon );
-	DrawTransPic((ScreenWidth*0.5f)+86 ,(ScreenHeight*0.5f)- 56, sb_nums[0][num/10] );
-	DrawTransPic((ScreenWidth*0.5f)+106,(ScreenHeight*0.5f)- 56, sb_nums[0][num%10] );
+	DrawTransPic( 234, 64, sb_colon );
+	DrawTransPic( 246, 64, sb_nums[0][num/10] );
+	DrawTransPic( 266, 64, sb_nums[0][num%10] );
 
-	DrawNum((ScreenWidth*0.5f), (ScreenHeight*0.5f)- 16, gHUD.stats[STAT_SECRETS], 3, 0 );
-	DrawTransPic((ScreenWidth*0.5f)+72,(ScreenHeight*0.5f)- 16, sb_slash );
-	DrawNum((ScreenWidth*0.5f)+80, (ScreenHeight*0.5f)- 16, gHUD.stats[STAT_TOTALSECRETS], 3, 0 );
+	DrawNum( 160, 104, gHUD.stats[STAT_SECRETS], 3, 0 );
+	DrawTransPic( 232, 104, sb_slash );
+	DrawNum( 240, 104, gHUD.stats[STAT_TOTALSECRETS], 3, 0 );
 
-	DrawNum((ScreenWidth*0.5f), (ScreenHeight*0.5f)+ 24, gHUD.stats[STAT_MONSTERS], 3, 0 );
-	DrawTransPic((ScreenWidth*0.5f)+72,(ScreenHeight*0.5f)+ 24, sb_slash );
-	DrawNum((ScreenWidth*0.5f)+80, (ScreenHeight*0.5f)+ 24, gHUD.stats[STAT_TOTALMONSTERS], 3, 0 );
+	DrawNum( 160, 144, gHUD.stats[STAT_MONSTERS], 3, 0 );
+	DrawTransPic( 232, 144, sb_slash );
+	DrawNum( 240, 144, gHUD.stats[STAT_TOTALMONSTERS], 3, 0 );
 }
 
 void CHudSBar::DrawFinale( float flTime )
 {
-	DrawTransPic((ScreenWidth-288)*0.5f, 16, sb_finale );
+	DrawTransPic( 16, 16, sb_finale );
 }
 
 void CHudSBar::DrawInventory( float flTime )
@@ -382,13 +389,13 @@ void CHudSBar::DrawInventory( float flTime )
 	if (g_iGameType == GAMETYPE_ROGUE)
 	{
 		if( gHUD.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
-			DrawPic( 0, -24, rsb_invbar[0] );
+			DrawPic( 0, -24, rsb_invbar[0], false, SBar_BackgroundAlpha() );
 		else
-			DrawPic( 0, -24, rsb_invbar[1] );
+			DrawPic( 0, -24, rsb_invbar[1], false, SBar_BackgroundAlpha() );
 	}
 	else
 	{
-		DrawPic( 0, -24, sb_ibar );
+		DrawPic( 0, -24, sb_ibar, false, SBar_BackgroundAlpha() );
 	}
 
 	// weapons
@@ -487,12 +494,13 @@ void CHudSBar::DrawInventory( float flTime )
 	{
 		sprintf( num, "%3i", gHUD.stats[STAT_SHELLS+i] );
 
+		// small yellow charset digits, like the original
 		if (num[0] != ' ')
-			DrawCharacter((6 * i + 1) * 8 - 2, -26, num[0] );
+			DrawCharacter((6 * i + 1) * 8 - 2, -26, 18 + num[0] - '0' );
 		if (num[1] != ' ')
-			DrawCharacter((6 * i + 2) * 8 - 2, -26, num[1] );
+			DrawCharacter((6 * i + 2) * 8 - 2, -26, 18 + num[1] - '0' );
 		if (num[2] != ' ')
-			DrawCharacter((6 * i + 3) * 8 - 2, -26, num[2] );
+			DrawCharacter((6 * i + 3) * 8 - 2, -26, 18 + num[2] - '0' );
 	}
 
 	flashon = 0;
@@ -615,12 +623,12 @@ int CHudSBar::Draw(float fTime)
 	if ((gEngfuncs.GetMaxClients() == 1 ) && (gHUD.showscores || gHUD.stats[STAT_HEALTH] <= 0))
 	{
 		if (gHUD.sb_lines)
-			DrawPic( 0, 0, sb_scorebar );
+			DrawPic( 0, 0, sb_scorebar, false, SBar_BackgroundAlpha() );
 		DrawScoreBoard ( fTime );
 	}
 	else if (gHUD.sb_lines)
 	{
-		DrawPic( 0, 0, sb_sbar );
+		DrawPic( 0, 0, sb_sbar, false, SBar_BackgroundAlpha() );
 	}
 
 	if ((gEngfuncs.GetMaxClients() == 1 ) && (gHUD.showscores || gHUD.stats[STAT_HEALTH] <= 0))

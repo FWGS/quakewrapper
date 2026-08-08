@@ -73,25 +73,28 @@ void CHudScoreboard :: InitHUDData( void )
 We have a minimum width of 1-320 - we could have the field widths scale with it?
 */
 
+// virtual 320-space layout, scaled to the screen
+#define SBOARD( x ) (( x ) * gHUD.m_iScale)
+
 // X positions
 // relative to the side of the scoreboard
-#define NAME_RANGE_MIN  20
-#define NAME_RANGE_MAX  145
-#define KILLS_RANGE_MIN 130
-#define KILLS_RANGE_MAX 170
-#define DIVIDER_POS		180
-#define DEATHS_RANGE_MIN  185
-#define DEATHS_RANGE_MAX  210
-#define PING_RANGE_MIN	245
-#define PING_RANGE_MAX	295
+#define NAME_RANGE_MIN    SBOARD( 20 )
+#define NAME_RANGE_MAX    SBOARD( 145 )
+#define KILLS_RANGE_MIN   SBOARD( 130 )
+#define KILLS_RANGE_MAX   SBOARD( 170 )
+#define DIVIDER_POS       SBOARD( 180 )
+#define DEATHS_RANGE_MIN  SBOARD( 185 )
+#define DEATHS_RANGE_MAX  SBOARD( 210 )
+#define PING_RANGE_MIN    SBOARD( 245 )
+#define PING_RANGE_MAX    SBOARD( 295 )
 
-#define SCOREBOARD_WIDTH 320
-		
+#define SCOREBOARD_WIDTH  SBOARD( 320 )
+
 
 // Y positions
-#define ROW_GAP  13
-#define ROW_RANGE_MIN 15
-#define ROW_RANGE_MAX ( ScreenHeight - 50 )
+#define ROW_GAP        SBOARD( 13 )
+#define ROW_RANGE_MIN  SBOARD( 15 )
+#define ROW_RANGE_MAX  ( ScreenHeight - SBOARD( 50 ))
 
 int CHudScoreboard :: Draw( float fTime )
 {
@@ -116,13 +119,13 @@ int CHudScoreboard :: Draw( float fTime )
 
 	gHUD.DrawHudStringReverse( KILLS_RANGE_MAX + xpos_rel, ypos, 0, "frags", 255, 140, 0 );
 	gHUD.DrawHudString( DIVIDER_POS + xpos_rel, ypos, ScreenWidth, "/", 255, 140, 0 );
-	gHUD.DrawHudString( DEATHS_RANGE_MIN + xpos_rel + 5, ypos, ScreenWidth, "deaths", 255, 140, 0 );
-	gHUD.DrawHudString( PING_RANGE_MAX + xpos_rel - 35, ypos, ScreenWidth, "ping", 255, 140, 0 );
+	gHUD.DrawHudString( DEATHS_RANGE_MIN + xpos_rel + SBOARD( 5 ), ypos, ScreenWidth, "deaths", 255, 140, 0 );
+	gHUD.DrawHudString( PING_RANGE_MAX + xpos_rel - SBOARD( 35 ), ypos, ScreenWidth, "ping", 255, 140, 0 );
 
 	list_slot += 1.2;
 	ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP);
 	xpos = NAME_RANGE_MIN + xpos_rel;
-	FillRGBA( xpos - 5, ypos, PING_RANGE_MAX - 5, 1, 255, 140, 0, 255);  // draw the seperator line
+	FillRGBA( xpos - SBOARD( 5 ), ypos, PING_RANGE_MAX - SBOARD( 5 ), gHUD.m_iScale, 255, 140, 0, 255);  // draw the seperator line
 	
 	list_slot += 0.8;
 
@@ -229,7 +232,7 @@ int CHudScoreboard :: Draw( float fTime )
 		if ( team_info->ownteam ) // if it is their team, draw the background different color
 		{
 			// overlay the background in blue,  then draw the score text over it
-			FillRGBA( NAME_RANGE_MIN + xpos_rel - 5, ypos, PING_RANGE_MAX - 5, ROW_GAP, 0, 0, 255, 70 );
+			FillRGBA( NAME_RANGE_MIN + xpos_rel - SBOARD( 5 ), ypos, PING_RANGE_MAX - SBOARD( 5 ), ROW_GAP, 0, 0, 255, 70 );
 		}
 
 		// draw their name (left to right)
@@ -241,7 +244,7 @@ int CHudScoreboard :: Draw( float fTime )
 
 		// draw divider
 		xpos = DIVIDER_POS + xpos_rel;
-		gHUD.DrawHudString( xpos, ypos, xpos + 20, "/", r, g, b );
+		gHUD.DrawHudString( xpos, ypos, xpos + SBOARD( 20 ), "/", r, g, b );
 
 		// draw deaths
 		xpos = DEATHS_RANGE_MAX + xpos_rel;
@@ -251,9 +254,9 @@ int CHudScoreboard :: Draw( float fTime )
 		// draw ping & packetloss
 		static char buf[64];
 		sprintf( buf, "%d", team_info->ping );
-		xpos = ((PING_RANGE_MAX - PING_RANGE_MIN) / 2) + PING_RANGE_MIN + xpos_rel + 25;
+		xpos = ((PING_RANGE_MAX - PING_RANGE_MIN) / 2) + PING_RANGE_MIN + xpos_rel + SBOARD( 25 );
 		UnpackRGB( r, g, b, RGB_YELLOWISH );
-		gHUD.DrawHudStringReverse( xpos, ypos, xpos - 50, buf, r, g, b );
+		gHUD.DrawHudStringReverse( xpos, ypos, xpos - SBOARD( 50 ), buf, r, g, b );
 
 	/*  Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 		sprintf( buf, " %d", team_info->packetloss );
@@ -320,21 +323,21 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 		{
 			if ( pl_info->thisplayer )
 			{  // green is the suicide color? i wish this could do grey...
-				FillRGBA( NAME_RANGE_MIN + xpos_rel - 5, ypos, PING_RANGE_MAX - 5, ROW_GAP, 80, 155, 0, 70 );
+				FillRGBA( NAME_RANGE_MIN + xpos_rel - SBOARD( 5 ), ypos, PING_RANGE_MAX - SBOARD( 5 ), ROW_GAP, 80, 155, 0, 70 );
 			}
 			else
 			{  // Highlight the killers name - overlay the background in red,  then draw the score text over it
-				FillRGBA( NAME_RANGE_MIN + xpos_rel - 5, ypos, PING_RANGE_MAX - 5, ROW_GAP, 255, 0, 0, ((float)15 * (float)(m_fLastKillTime - gHUD.m_flTime)) );
+				FillRGBA( NAME_RANGE_MIN + xpos_rel - SBOARD( 5 ), ypos, PING_RANGE_MAX - SBOARD( 5 ), ROW_GAP, 255, 0, 0, ((float)15 * (float)(m_fLastKillTime - gHUD.m_flTime)) );
 			}
 		}
 		else if ( pl_info->thisplayer ) // if it is their name, draw it a different color
 		{
 			// overlay the background in blue,  then draw the score text over it
-			FillRGBA( NAME_RANGE_MIN + xpos_rel - 5, ypos, PING_RANGE_MAX - 5, ROW_GAP, 0, 0, 255, 70 );
+			FillRGBA( NAME_RANGE_MIN + xpos_rel - SBOARD( 5 ), ypos, PING_RANGE_MAX - SBOARD( 5 ), ROW_GAP, 0, 0, 255, 70 );
 		}
 
 		// draw their name (left to right)
-		gHUD.DrawHudString( xpos + nameoffset, ypos, NAME_RANGE_MAX + xpos_rel, pl_info->name, r, g, b );
+		gHUD.DrawHudString( xpos + SBOARD( nameoffset ), ypos, NAME_RANGE_MAX + xpos_rel, pl_info->name, r, g, b );
 
 		// draw kills (right to left)
 		xpos = KILLS_RANGE_MAX + xpos_rel;
@@ -342,7 +345,7 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 
 		// draw divider
 		xpos = DIVIDER_POS + xpos_rel;
-		gHUD.DrawHudString( xpos, ypos, xpos + 20, "/", r, g, b );
+		gHUD.DrawHudString( xpos, ypos, xpos + SBOARD( 20 ), "/", r, g, b );
 
 		// draw deaths
 		xpos = DEATHS_RANGE_MAX + xpos_rel;
@@ -351,8 +354,8 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 		// draw ping & packetloss
 		static char buf[64];
 		sprintf( buf, "%d", g_PlayerInfoList[best_player].ping );
-		xpos = ((PING_RANGE_MAX - PING_RANGE_MIN) / 2) + PING_RANGE_MIN + xpos_rel + 25;
-		gHUD.DrawHudStringReverse( xpos, ypos, xpos - 50, buf, r, g, b );
+		xpos = ((PING_RANGE_MAX - PING_RANGE_MIN) / 2) + PING_RANGE_MIN + xpos_rel + SBOARD( 25 );
+		gHUD.DrawHudStringReverse( xpos, ypos, xpos - SBOARD( 50 ), buf, r, g, b );
 
 	/*  Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 		if ( g_PlayerInfoList[best_player].packetloss >= 63 )

@@ -156,7 +156,7 @@ int CHudMessage::YPosition( float y, int height )
 
 void CHudMessage::MessageScanNextChar( void )
 {
-	int srcRed, srcGreen, srcBlue, destRed, destGreen, destBlue;
+	int srcRed, srcGreen, srcBlue, destRed = 0, destGreen = 0, destBlue = 0;
 	int blend;
 
 	srcRed = m_parms.pMessage->r1;
@@ -164,34 +164,30 @@ void CHudMessage::MessageScanNextChar( void )
 	srcBlue = m_parms.pMessage->b1;
 	blend = 0;	// Pure source
 
+	// fade in/out is done with alpha, not by blending the color to black
+	m_parms.a = 255 - m_parms.fadeBlend;
+
 	switch( m_parms.pMessage->effect )
 	{
 	// Fade-in / Fade-out
 	case 0:
 	case 1:
-		destRed = destGreen = destBlue = 0;
-		blend = m_parms.fadeBlend;
 		break;
 
 	case 2:
 		m_parms.charTime += m_parms.pMessage->fadein;
 		if ( m_parms.charTime > m_parms.time )
 		{
-			srcRed = srcGreen = srcBlue = 0;
-			blend = 0;	// pure source
+			m_parms.a = 0;	// not typed out yet
 		}
-		else
+		else if ( m_parms.time <= m_parms.fadeTime )
 		{
 			float deltaTime = m_parms.time - m_parms.charTime;
 
-			destRed = destGreen = destBlue = 0;
-			if ( m_parms.time > m_parms.fadeTime )
-			{
-				blend = m_parms.fadeBlend;
-			}
-			else if ( deltaTime > m_parms.pMessage->fxtime )
-				blend = 0;	// pure dest
-			else
+			m_parms.a = 255;
+
+			// freshly typed characters flash in the highlight color
+			if ( deltaTime <= m_parms.pMessage->fxtime )
 			{
 				destRed = m_parms.pMessage->r2;
 				destGreen = m_parms.pMessage->g2;
@@ -206,14 +202,19 @@ void CHudMessage::MessageScanNextChar( void )
 	else if ( blend < 0 )
 		blend = 0;
 
+	if ( m_parms.a > 255 )
+		m_parms.a = 255;
+	else if ( m_parms.a < 0 )
+		m_parms.a = 0;
+
 	m_parms.r = ((srcRed * (255-blend)) + (destRed * blend)) >> 8;
 	m_parms.g = ((srcGreen * (255-blend)) + (destGreen * blend)) >> 8;
 	m_parms.b = ((srcBlue * (255-blend)) + (destBlue * blend)) >> 8;
 
 	if ( m_parms.pMessage->effect == 1 && m_parms.charTime != 0 )
 	{
-		if ( m_parms.x >= 0 && m_parms.y >= 0 && (m_parms.x + gHUD.m_scrinfo.charWidths[ m_parms.text ]) <= ScreenWidth )
-			TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.pMessage->r2, m_parms.pMessage->g2, m_parms.pMessage->b2 );
+		if ( m_parms.x >= 0 && m_parms.y >= 0 && (m_parms.x + 8 * gHUD.m_iScale) <= ScreenWidth )
+			gHUD.DrawCharacter( m_parms.x, m_parms.y, m_parms.text, m_parms.pMessage->r2, m_parms.pMessage->g2, m_parms.pMessage->b2, m_parms.a );
 	}
 }
 
@@ -283,12 +284,12 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			width = 0;
 		}
 		else
-			width += gHUD.m_scrinfo.charWidths[*pText];
+			width += 8 * gHUD.m_iScale;
 		pText++;
 		length++;
 	}
 	m_parms.length = length;
-	m_parms.totalHeight = (m_parms.lines * gHUD.m_scrinfo.iCharHeight);
+	m_parms.totalHeight = (m_parms.lines * 8 * gHUD.m_iScale);
 
 
 	m_parms.y = YPosition( pMessage->y, m_parms.totalHeight );
@@ -305,8 +306,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		pLineStart = pText;
 		while ( *pText && *pText != '\n' )
 		{
-			unsigned char c = *pText;
-			m_parms.width += gHUD.m_scrinfo.charWidths[c];
+			m_parms.width += 8 * gHUD.m_iScale;
 			m_parms.lineLength++;
 			pText++;
 		}
@@ -317,15 +317,15 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		for ( j = 0; j < m_parms.lineLength; j++ )
 		{
 			m_parms.text = (unsigned char)pLineStart[j];
-			int next = m_parms.x + gHUD.m_scrinfo.charWidths[ m_parms.text ];
+			int next = m_parms.x + 8 * gHUD.m_iScale;
 			MessageScanNextChar();
-			
+
 			if ( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
-				TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b );
+				gHUD.DrawCharacter( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b, m_parms.a );
 			m_parms.x = next;
 		}
 
-		m_parms.y += gHUD.m_scrinfo.iCharHeight;
+		m_parms.y += 8 * gHUD.m_iScale;
 	}
 }
 
