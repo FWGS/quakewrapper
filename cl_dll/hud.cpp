@@ -95,6 +95,11 @@ void CHud :: Init( void )
 	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
 	default_fov = CVAR_CREATE( "default_fov", "90", 0 );
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
+
+	// weapon auto-switch preference, read by the server from userinfo
+	// for the rerelease CheckPlayerEXFlags builtin:
+	// 0 - never switch, 1 - vanilla "better weapon", 2 - only new weapons
+	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	m_pCvarCrosshair = CVAR_CREATE( "crosshair", "1", FCVAR_ARCHIVE );
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );

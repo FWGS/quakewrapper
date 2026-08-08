@@ -211,6 +211,7 @@ void PR_SetTraceGlobals( void );
 #define PR_ValidateString( str ) _PR_ValidateString( str, __FILE__, __LINE__ )
 void _PR_ValidateString( const char *s, const char *filename, const int fileline );
 void PR_InstallBuiltins( void );
+void PR_ResolveNamedBuiltins( void );
 
 //
 // pr_localize.cpp

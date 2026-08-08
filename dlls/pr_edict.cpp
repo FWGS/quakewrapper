@@ -1089,6 +1089,9 @@ void PR_LoadProgs( const char *progname )
 	// install builtins for progs
 	PR_InstallBuiltins();
 
+	// resolve #0:ex_name builtins from the 2021 rerelease progs
+	PR_ResolveNamedBuiltins();
+
 	GAME_ADD_COMMAND ("edict", ED_PrintEdict_f);
 	GAME_ADD_COMMAND ("edicts", ED_PrintEdicts);
 	GAME_ADD_COMMAND ("edictcount", ED_Count);

@@ -792,33 +792,42 @@ void localcmd( string cmd )
 */
 void PF_localcmd( void )
 {
-	const char	*s;
+	// QC is allowed to stream a single command over several calls, for example:
+	//	localcmd ("changelevel ");
+	//	localcmd (mapname);
+	//	localcmd ("\n");
+	// the engine rejects commands not terminated by '\n' or ';', so accumulate the pieces and only flush complete commands
+	// varargs are concatenated with no separator, like PF_VarString
+	static char buffer[1024];
 
 	if( !PR_ValidateArgs( "localcmd", 1, 8 ))
 		return;
 
-	if( pr.argc == 1 )
-	{
-		if( !Q_strncmp( G_STRING( OFS_PARM0 ), "restart", 7 ))
-			s = "reload\n";
-		else
-			s = G_STRING( OFS_PARM0 );
-	}
-	else
-	{
-		static char concat[1024];
+	for( int i = 0; i < pr.argc; i++ )
+		Q_strncat( buffer, G_STRING( OFS_PARM0 + i * 3 ), sizeof( buffer ));
 
-		Q_strncpy( concat, G_STRING( OFS_PARM0 ), sizeof( concat ));
-		for( int i = 1; i < pr.argc; i++ )
+	int len = Q_strlen( buffer );
+
+	if( !len )
+		return;
+
+	if( buffer[len - 1] != '\n' && buffer[len - 1] != ';' )
+	{
+		if( len >= (int)sizeof( buffer ) - 1 )
 		{
-			Q_strncat( concat, " ", sizeof( concat ));
-			Q_strncat( concat, G_STRING( OFS_PARM0 + i * 3 ), sizeof( concat ));
+			ALERT( at_error, "%s: buffer overflow, command discarded\n", __func__ );
+			buffer[0] = '\0';
 		}
-
-		s = concat;
+		return; // incomplete command, wait for the rest
 	}
 
-	SERVER_COMMAND( s );
+	// quake "restart" is called "reload" in Xash3D
+	if( !Q_strncmp( buffer, "restart", 7 ))
+		SERVER_COMMAND( "reload\n" );
+	else
+		SERVER_COMMAND( buffer );
+
+	buffer[0] = '\0';
 }
 
 /*
@@ -1995,6 +2004,278 @@ static void PF_stub( void )
 {
 }
 
+/*
+=======================================================================
+
+		QUAKE 2021 RERELEASE EXTENSIONS
+
+=======================================================================
+*/
+
+/*
+=================
+PR_LocalizeVarString
+
+rerelease variant of PF_VarString: if the first string is a $key,
+localize it and substitute {0}..{N} placeholders with the remaining
+args (which may be $keys themselves). plain strings keep the old
+concatenation behavior
+=================
+*/
+static char *PR_LocalizeVarString( int fmtarg )
+{
+	static char out[MAX_VAR_STRING];
+	const char *fmt = G_STRING( OFS_PARM0 + fmtarg * 3 );
+
+	if( fmt[0] != '$' )
+		return PF_VarString( fmtarg );
+
+	fmt = PR_LocalizeString( fmt );
+
+	char *dst = out;
+	char *outend = out + sizeof( out ) - 1;
+
+	while( *fmt && dst < outend )
+	{
+		if( fmt[0] == '{' && fmt[1] >= '0' && fmt[1] <= '9' )
+		{
+			char *stop;
+			int idx = strtol( fmt + 1, &stop, 10 );
+
+			if( *stop == '}' )
+			{
+				const char *sub = "";
+				int argn = fmtarg + 1 + idx;
+
+				if( argn < pr.argc )
+					sub = PR_LocalizeString( G_STRING( OFS_PARM0 + argn * 3 ));
+
+				while( *sub && dst < outend )
+					*dst++ = *sub++;
+
+				fmt = stop + 1;
+				continue;
+			}
+		}
+
+		*dst++ = *fmt++;
+	}
+
+	*dst = '\0';
+
+	return out;
+}
+
+/*
+=================
+PF_ex_bprint
+
+localized broadcast print
+
+void ex_bprint( string s, ... )
+=================
+*/
+static void PF_ex_bprint( void )
+{
+	g_engfuncs.pfnServerPrint( PR_LocalizeVarString( 0 ));
+}
+
+/*
+=================
+PF_ex_sprint
+
+localized print to a specific client
+
+void ex_sprint( entity client, string s, ... )
+=================
+*/
+static void PF_ex_sprint( void )
+{
+	int entnum = G_EDICTNUM( OFS_PARM0 );
+
+	if( entnum < 1 || entnum > gpGlobals->maxClients )
+	{
+		ALERT( at_warning, "tried to sprint to a non-client\n" );
+		return;
+	}
+
+	CLIENT_PRINTF( G_EDICT( OFS_PARM0 ), print_console, PR_LocalizeVarString( 1 ));
+}
+
+/*
+=================
+PF_ex_centerprint
+
+localized centerprint to a specific client
+
+void ex_centerprint( entity client, string s, ... )
+=================
+*/
+static void PF_ex_centerprint( void )
+{
+	MESSAGE_BEGIN( MSG_ONE, gmsgHudText, G_EDICT( OFS_PARM0 ));
+		WRITE_STRING( PR_LocalizeVarString( 1 ));
+	MESSAGE_END();
+}
+
+/*
+=================
+PF_ex_finaleFinished
+
+in the rerelease returns true once the client has finished displaying
+the end-of-episode text, we can't know that yet, so always report finished
+and let the QC finale sequence advance on its own delays
+
+float ex_finaleFinished()
+=================
+*/
+static void PF_ex_finaleFinished( void )
+{
+	G_FLOAT( OFS_RETURN ) = 1.0f;
+}
+
+/*
+=================
+PF_ex_localsound
+
+plays a non-spatialized sound on a specific client
+
+void ex_localsound( entity client, string sample )
+=================
+*/
+static void PF_ex_localsound( void )
+{
+	int entnum = G_EDICTNUM( OFS_PARM0 );
+
+	if( entnum < 1 || entnum > gpGlobals->maxClients )
+	{
+		ALERT( at_warning, "tried to localsound to a non-client\n" );
+		return;
+	}
+
+	CLIENT_COMMAND( G_EDICT( OFS_PARM0 ), "play %s\n", G_STRING( OFS_PARM1 ));
+}
+
+/*
+=================
+PF_ex_CheckPlayerEXFlags
+
+returns rerelease player extension flags controlling automatic weapon
+switch on pickup. mapped from the client's cl_autowepswitch userinfo
+cvar: 0 - never switch, 1 - vanilla "better weapon" behavior, 2 - switch only to newly acquired weapons
+
+float ex_CheckPlayerEXFlags( entity playerEnt )
+=================
+*/
+#define PEF_CHANGEONLYNEW 1
+#define PEF_CHANGENEVER   2
+
+static void PF_ex_CheckPlayerEXFlags( void )
+{
+	int entnum = G_EDICTNUM( OFS_PARM0 );
+
+	G_FLOAT( OFS_RETURN ) = 0.0f;
+
+	if( entnum < 1 || entnum > gpGlobals->maxClients )
+		return;
+
+	const char *s = g_engfuncs.pfnInfoKeyValue( g_engfuncs.pfnGetInfoKeyBuffer( G_EDICT( OFS_PARM0 )), "cl_autowepswitch" );
+
+	if( !s || !s[0] )
+		return;	// no cvar on this client, keep vanilla behavior
+
+	switch( Q_atoi( s ))
+	{
+	case 0:
+		G_FLOAT( OFS_RETURN ) = PEF_CHANGENEVER;
+		break;
+	case 2:
+		G_FLOAT( OFS_RETURN ) = PEF_CHANGEONLYNEW;
+		break;
+	default:	// 1 and everything else is vanilla
+		break;
+	}
+}
+
+/*
+=================
+PF_ex_float0
+
+shared stub for rerelease builtins where returning 0 selects the classic fallback behavior:
+ - bot_movetopoint, bot_followentity: BOT_GOAL_ERROR (no bot support)
+ - walkpathtogoal: PATH_ERROR, monster AI falls back to movetogoal
+=================
+*/
+static void PF_ex_float0( void )
+{
+	G_FLOAT( OFS_RETURN ) = 0.0f;
+}
+
+// base number for name-resolved rerelease builtins, must not
+// collide with anything else in prog_builtin
+#define EXT_BUILTIN_BASE 240
+
+static const struct
+{
+	const char	*name;
+	builtin_t	func;
+} prog_named_builtin[] =
+{
+{ "ex_bprint",             PF_ex_bprint },
+{ "ex_sprint",             PF_ex_sprint },
+{ "ex_centerprint",        PF_ex_centerprint },
+{ "ex_finaleFinished",     PF_ex_finaleFinished },
+{ "ex_localsound",         PF_ex_localsound },
+{ "ex_bot_movetopoint",    PF_ex_float0 },
+{ "ex_bot_followentity",   PF_ex_float0 },
+{ "ex_CheckPlayerEXFlags", PF_ex_CheckPlayerEXFlags },
+{ "ex_walkpathtogoal",     PF_ex_float0 },
+{ "ex_draw_point",         PF_stub }, // debug visualization, not supported
+{ "ex_draw_line",          PF_stub },
+{ "ex_draw_arrow",         PF_stub },
+{ "ex_draw_ray",           PF_stub },
+{ "ex_draw_circle",        PF_stub },
+{ "ex_draw_bounds",        PF_stub },
+{ "ex_draw_worldtext",     PF_stub },
+{ "ex_draw_sphere",        PF_stub },
+{ "ex_draw_cylinder",      PF_stub },
+};
+
+/*
+=================
+PR_ResolveNamedBuiltins
+
+rerelease progs declare extension builtins as "= #0:name" which
+compiles to a function with first_statement == 0. patch such functions
+to point at our assigned builtin numbers
+=================
+*/
+void PR_ResolveNamedBuiltins( void )
+{
+	for( int i = 1; i < pr.progs->numfunctions; i++ )
+	{
+		dfunction_t *f = &pr.functions[i];
+
+		if( f->first_statement != 0 )
+			continue;
+
+		const char *name = STRING( f->s_name );
+		int j;
+
+		for( j = 0; j < (int)ARRAYSIZE( prog_named_builtin ); j++ )
+		{
+			if( !Q_strcmp( name, prog_named_builtin[j].name ))
+			{
+				f->first_statement = -( EXT_BUILTIN_BASE + j );
+				break;
+			}
+		}
+
+		if( j == (int)ARRAYSIZE( prog_named_builtin ))
+			ALERT( at_warning, "PR_ResolveNamedBuiltins: unknown named builtin %s\n", name );
+	}
+}
+
 static builtin_t prog_builtin[300] =
 {
 NULL,			// #0 NULL function (not callable)
@@ -2110,6 +2391,10 @@ void PR_InstallBuiltins( void )
 {
 	prog_builtin[232] = PF_stub; // clientstat
 	prog_builtin[233] = PF_stub; // globalstat
+
+	// quake 2021 rerelease named builtins (see PR_ResolveNamedBuiltins)
+	for( int i = 0; i < (int)ARRAYSIZE( prog_named_builtin ); i++ )
+		prog_builtin[EXT_BUILTIN_BASE + i] = prog_named_builtin[i].func;
 
 	pr.numbuiltins = ARRAYSIZE( prog_builtin );
 	pr.builtins = prog_builtin;
