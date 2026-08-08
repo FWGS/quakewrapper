@@ -1343,14 +1343,9 @@ void M_AdjustSliders (int dir)
 		val = bound( 30, Cvar_GetValue( "viewsize" ) + dir * 10, 120 );
 		Cvar_SetValue ("viewsize", val);
 		break;
-	case 5:	// gamma
-		val = bound( 0.5, Cvar_GetValue( "gamma" ) + dir * 0.05, 3 );
-		/*v_gamma.value -= dir * 0.05;
-		if (v_gamma.value < 0.5)
-			v_gamma.value = 0.5;
-		if (v_gamma.value > 1)
-			v_gamma.value = 1;*/
-		Cvar_SetValue ("gamma", val);
+	case 5:	// brightness
+		val = bound( 0, Cvar_GetValue( "brightness" ) + dir * 0.3, 3 );
+		Cvar_SetValue ("brightness", val);
 		break;
 	case 6:	// mouse speed
 		val = bound( 1, Cvar_GetValue( "sensitivity" ) + dir * 0.5, 11 );
@@ -1466,7 +1461,7 @@ void M_Options_Draw (void)
 	M_DrawSlider (220, y, r); y+=8;
 
 	M_Print (16, y, "            Brightness");
-	r = (Cvar_GetValue("gamma") - 0.5) / (3 - 0.5);
+	r = Cvar_GetValue("brightness") / 3;
 	M_DrawSlider (220, y, r); y+=8;
 
 	M_Print (16, y, "           Mouse Speed");
@@ -3775,8 +3770,8 @@ static void M_SetSlider (int row, float frac)
 	case 4:	// screen size, steps of 10
 		Cvar_SetValue ("viewsize", 30 + (int)(frac * 9 + 0.5) * 10);
 		break;
-	case 5:	// gamma
-		Cvar_SetValue ("gamma", 0.5 + frac * 2.5);
+	case 5:	// brightness
+		Cvar_SetValue ("brightness", frac * 3);
 		break;
 	case 6:	// mouse speed
 		Cvar_SetValue ("sensitivity", 1 + frac * 10);
