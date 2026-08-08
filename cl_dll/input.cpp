@@ -26,7 +26,6 @@ extern "C"
 #include "view.h"
 #include <string.h>
 #include <ctype.h>
-#include "r_studioint.h"
 #include "com_model.h"
 #include "cl_entity.h"
 
@@ -38,10 +37,7 @@ extern "C"
 	int DLLEXPORT HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding );
 }
 
-extern engine_studio_api_t IEngineStudio;
-
 extern int g_iAlive;
-extern int g_iXashEngine;
 extern cl_enginefunc_t gEngfuncs;
 
 void IN_Init (void);
@@ -575,55 +571,6 @@ void CL_AdjustAngles ( float frametime, float *viewangles )
 		viewangles[ROLL] = -50;
 }
 
-void CL_MergeHulls( int active )
-{
-	static int parse_hulls = 0;
-
-	// map has changed or restarted so we need to rebuild hulls
-	if( !active ) parse_hulls = 0;
-
-	if (!parse_hulls && gEngfuncs.GetEntityByIndex( 0 ) && gEngfuncs.GetEntityByIndex( 0 )->model)
-	{
-		hull_t	*hull;
-		int	count = 0;
-
-		// walk through the models and apply right hull sizes to him
-		for( int i = 0; i < 512; i++ )
-		{
-			model_t *m = IEngineStudio.GetModelByIndex( i );
-
-			if( m && m->type == mod_brush )
-			{
-				hull = &m->hulls[1];
-				hull->clip_mins[0] = -16;
-				hull->clip_mins[1] = -16;
-				hull->clip_mins[2] = -24;
-				hull->clip_maxs[0] = 16;
-				hull->clip_maxs[1] = 16;
-				hull->clip_maxs[2] = 32;
-				hull = &m->hulls[2];
-				hull->clip_mins[0] = -32;
-				hull->clip_mins[1] = -32;
-				hull->clip_mins[2] = -24;
-				hull->clip_maxs[0] = 32;
-				hull->clip_maxs[1] = 32;
-				hull->clip_maxs[2] = 64;
-				hull = &m->hulls[3];
-				hull->clip_mins[0] = 0;
-				hull->clip_mins[1] = 0;
-				hull->clip_mins[2] = 0;
-				hull->clip_maxs[0] = 0;
-				hull->clip_maxs[1] = 0;
-				hull->clip_maxs[2] = 0;
-				count++;
-			}
-		}
-
-		gEngfuncs.Con_Printf( "CL_MergeHulls: %s total %i hulls changed\n", gEngfuncs.GetEntityByIndex( 0 )->model->name, count );
-		parse_hulls = true;
-	}
-}
-
 /*
 ================
 CL_CreateMove
@@ -638,9 +585,6 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	float spd;
 	vec3_t viewangles;
 	static vec3_t oldangles;
-
-	if (!g_iXashEngine)
-		CL_MergeHulls( active );
 
 	if ( active && !gHUD.m_iIntermission )
 	{

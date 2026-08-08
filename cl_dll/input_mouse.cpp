@@ -9,13 +9,8 @@ cvar_t      *sensitivity;
 cvar_t  *in_joystick;
 
 FWGSInput fwgsInput;
-
-#if SUPPORT_GOLDSOURCE_INPUT
-GoldSourceInput goldSourceInput;
-AbstractInput* currentInput = &goldSourceInput;
-#else
 AbstractInput* currentInput = &fwgsInput;
-#endif
+
 extern "C"  void DLLEXPORT IN_ClientMoveEvent( float forwardmove, float sidemove )
 {
 	currentInput->IN_ClientMoveEvent(forwardmove, sidemove);
@@ -68,16 +63,6 @@ void IN_Shutdown( void )
 
 void IN_Init( void )
 {
-#if SUPPORT_GOLDSOURCE_INPUT
-	if (IsXashFWGS()) {
-		gEngfuncs.Con_Printf( "FWGS Xash3D input is in use\n" );
-		currentInput = &fwgsInput;
-	} else {
-		gEngfuncs.Con_Printf( "GoldSource input is in use\n" );
-		currentInput = &goldSourceInput;
-	}
-#else
 	currentInput = &fwgsInput;
-#endif
 	currentInput->IN_Init();
 }

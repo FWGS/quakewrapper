@@ -8,14 +8,10 @@ import os
 def options(opt):
 	grp = opt.add_option_group('Client options')
 
-	grp.add_option('--disable-goldsrc-support', action = 'store_false', dest = 'GOLDSOURCE_SUPPORT',
-		default=True, help = 'disable GoldSource compatibility')
-
 	grp.add_option('--enable-fmod', action = 'store_true', dest = 'FMOD',
 		default = False, help = 'enable using fmod for music')
 
 def configure(conf):
-	conf.env.GOLDSOURCE_SUPPORT = conf.options.GOLDSOURCE_SUPPORT
 	if conf.env.DEST_OS != 'win32':
 		conf.check_cc(lib='dl')
 
@@ -34,14 +30,6 @@ def build(bld):
 
 	if bld.env.DEST_OS == 'win32':
 		libs += ['USER32']
-
-	if bld.env.GOLDSOURCE_SUPPORT:
-		defines += ['GOLDSOURCE_SUPPORT']
-
-		if bld.env.DEST_OS == 'win32':
-			libs += ["WINMM"]
-		else:
-			libs += ['DL']
 
 	if bld.env.DEST_OS not in ['dos']:
 		install_path = os.path.join(bld.env.GAMEDIR, bld.env.CLIENT_INSTALL_DIR)

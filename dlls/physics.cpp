@@ -29,8 +29,6 @@
 #include "enginefeatures.h"
 #include "pm_defs.h"
 
-extern DLL_GLOBAL BOOL		g_fXashEngine;
-
 //
 // Xash3D physics interface
 //
@@ -356,28 +354,11 @@ int Server_GetPhysicsInterface( int iVersion, server_physics_api_t *pfuncsFromEn
 		return FALSE;
 	}
 
-	size_t iExportSize = sizeof( server_physics_api_t );
-	size_t iImportSize = sizeof( physics_interface_t );
-
-	// NOTE: the very old versions NOT have information about current build in any case
-	if( g_iXashEngineBuildNumber <= 1910 )
-	{
-		if( g_fXashEngine )
-			ALERT( at_console, "old version of Xash3D was detected. Engine features was disabled.\n" );
-
-		// interface sizes for build 1905 and older
-		iExportSize = 28;
-		iImportSize = 24;
-	}
-
-	if( g_iXashEngineBuildNumber <= 3700 )
-		iImportSize -= 12;
-
 	// copy new physics interface
-	memcpy( &g_physfuncs, pfuncsFromEngine, iExportSize );
+	memcpy( &g_physfuncs, pfuncsFromEngine, sizeof( server_physics_api_t ));
 
 	// fill engine callbacks
-	memcpy( pFunctionTable, &gPhysicsInterface, iImportSize );
+	memcpy( pFunctionTable, &gPhysicsInterface, sizeof( physics_interface_t ));
 
 	return TRUE;
 }

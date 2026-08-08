@@ -202,8 +202,4 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 {
 	memcpy(&g_engfuncs, pengfuncsFromEngine, sizeof(enginefuncs_t));
 	gpGlobals = pGlobals;
-
-	g_iXashEngineBuildNumber = CVAR_GET_FLOAT( "build" ); // 0 for old builds or GoldSrc
-	if( g_iXashEngineBuildNumber <= 0 )
-		g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "buildnum" );
 }

@@ -37,7 +37,6 @@ extern "C"
 cl_enginefunc_t gEngfuncs;
 render_api_t gRenderfuncs;
 CHud gHUD;
-int g_iXashEngine = FALSE;
 void InitInput (void);
 void EV_HookEvents( void );
 void IN_Commands( void );
@@ -186,9 +185,6 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 		return 0;
 
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
-
-	if (gEngfuncs.pfnGetCvarPointer( "host_clientloaded" ))
-		g_iXashEngine = TRUE;
 
 	return 1;
 }

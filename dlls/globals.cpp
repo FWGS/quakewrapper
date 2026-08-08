@@ -27,8 +27,6 @@
 #include "util.h"
 
 DLL_GLOBAL int		g_iSkillLevel;
-DLL_GLOBAL BOOL		g_fXashEngine;
 DLL_GLOBAL const Vector	g_vecZero = Vector(0,0,0);
 DLL_GLOBAL BOOL		g_registered = FALSE;
-DLL_GLOBAL int		g_iXashEngineBuildNumber;
 DLL_GLOBAL BOOL		g_fTouchSemaphore = FALSE;

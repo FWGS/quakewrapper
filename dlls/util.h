@@ -85,7 +85,6 @@ extern float UTIL_AngleMod( float a );
 extern float UTIL_AngleMod( float ideal, float current, float speed );
 
 extern DLL_GLOBAL const Vector g_vecZero;
-extern DLL_GLOBAL int g_iXashEngineBuildNumber;
 extern DLL_GLOBAL BOOL g_fTouchSemaphore;
 extern DLL_GLOBAL BOOL g_registered;
 

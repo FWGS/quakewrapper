@@ -18,8 +18,6 @@
 #include "game.h"
 #include "shake.h"
 
-extern DLL_GLOBAL BOOL		g_fXashEngine;
-
 int gmsgShake = 0;
 int gmsgFade = 0;
 int gmsgResetHUD = 0;
@@ -212,10 +210,6 @@ void GameDLLInit( void )
 	g_footsteps = CVAR_GET_POINTER( "mp_footsteps" );
 	g_psv_quakehulls = CVAR_GET_POINTER( "sv_quakehulls" );
 	g_psv_teamplay = CVAR_GET_POINTER( "teamplay" );
-
-	if (CVAR_GET_POINTER( "host_gameloaded" ))
-		g_fXashEngine = TRUE;
-	else g_fXashEngine = FALSE;
 
 	CVAR_REGISTER (&noexit);
 	CVAR_REGISTER (&samelevel);
