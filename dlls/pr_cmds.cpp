@@ -388,6 +388,20 @@ void PF_setmodel( void )
 		maxs = mod->maxs;
 	}
 
+	// mitigate the bug on hub.bsp from mg1, when exiting mge1m2 spawns player at hub.bsp
+	// and then hub.bsp spawns players at mge1m1.bsp because player touches changelevel
+	// trigger just by one unit. Apparently this is caused by Mod_LoadSubmodels in the engine
+	//
+	// to not break anything else, only do this for triggers
+	if( mod && mod->type == mod_brush && pev->solid == SOLID_TRIGGER )
+	{
+		for( int i = 0; i < 3; i++ )
+		{
+			mins[i] += 1.0f;
+			maxs[i] -= 1.0f;
+		}
+	}
+
 	if( mod && mod->type == mod_sprite )
 	{
 		// FIXME: kRenderTransAlpha doesn't have lerping between frames

@@ -91,12 +91,23 @@ void SV_TouchLinks( edict_t *ent, areanode_t *node )
 		if( !pevTouch->touch || pevTouch->solid != SOLID_TRIGGER )
 			continue;
 
-		if( pev->absmin[0] > pevTouch->absmax[0]
-		 || pev->absmin[1] > pevTouch->absmax[1]
-		 || pev->absmin[2] > pevTouch->absmax[2]
-		 || pev->absmax[0] < pevTouch->absmin[0]
-		 || pev->absmax[1] < pevTouch->absmin[1]
-		 || pev->absmax[2] < pevTouch->absmin[2] )
+		// another part of a bug workaround in PF_setmodel:
+		// to avoid mge1m2 -> hub -> mge1m1 unwanted chain of changelevels
+		// we need to test touch against real boxes
+		// items keep their bbox to stay easy to pick up
+		Vector mins = pev->origin + pev->mins;
+		Vector maxs = pev->origin + pev->maxs;
+		Vector touchmins = pevTouch->origin + pevTouch->mins;
+		Vector touchmaxs = pevTouch->origin + pevTouch->maxs;
+
+		if( FBitSet( pevTouch->flags, FL_ITEM ))
+		{
+			touchmins = pevTouch->absmin;
+			touchmaxs = pevTouch->absmax;
+		}
+
+		if( mins[0] > touchmaxs[0] || mins[1] > touchmaxs[1] || mins[2] > touchmaxs[2]
+			|| maxs[0] < touchmins[0] || maxs[1] < touchmins[1] || maxs[2] < touchmins[2] )
 			continue;
 
 		old_self = pr.global_struct->self;
